@@ -32,6 +32,7 @@ h3 {
 	color: #fff;
 	padding: 2px 10px;
 	border-radius: 2px;
+	font-size: 1rem;
 }
 ul {
 	margin: 0 auto;
@@ -85,8 +86,10 @@ li span {
 }
 li strong {
 	color: #000;
-	font-style: normal;
 	font-size: 1rem;
+}
+strong {
+	font-weight: bold;
 }
 .centered {
 	text-align: center;
