@@ -1,11 +1,10 @@
 body {
     padding: 10px;
-    font-family: 'PT Sans', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 62.5%;
 }
 h1, h2 {
 	font-size: 1.6rem;
-	margin: 8px 0;
 }
 p {
 	font-size: 1.2rem;
@@ -13,27 +12,81 @@ p {
 	line-height: 1.4;
 	color: #333;
 }
+h1 {
+	text-align: center;
+}
 article {
 	margin: 0 auto 30px;
 	max-width: 680px;
 }
-li {
-	border-bottom: 1px dotted #ddd;
-	line-height: 1.6;
+h3 {
+	font-size: 1.6rem;
+	text-align: center;
+	margin-bottom: 10px;
 }
-li strong {
+.tools {
+
+}
+.tools span {
+	background: #333;
+	color: #fff;
+	padding: 2px 10px;
+	border-radius: 2px;
+}
+ul {
+	margin: 0 auto;
+	width: 70%;
+}
+li {
+	clear: left;
+	margin-bottom: 20px;
+	overflow: hidden;
+	padding-bottom: 60px;
+	border-bottom: 2px solid #000;
+}
+li.two div {
+	line-height: 1.6;
+	width: 49%;
+	float: left;
+}
+li.two div:first-child {
+	margin-right: 10px;
+}
+li.one div {
+	line-height: 1.6;
+	width: 90%;
+	margin: 0 auto;
+}
+li div {
+	padding-bottom: 10px;
+}
+li div img {
+	height: 100%;
+	width: 100%;
+}
+li h4 {
+	position: relative;
+	text-align: center;
+	font-size: 1.6rem;
+	margin-bottom: 20px;
+}
+li p {
 	font-size: 1.2rem;
+	margin: 0 auto;
+	width: 90%;
 }
 li span {
-	float: right;
 	color: #555;
+	padding-right: 4px;
+	display: inline-block;
+	font-weight: bold;
+	text-transform: uppercase;
 	font-size: 1rem;
 }
-li span em {
+li strong {
 	color: #000;
 	font-style: normal;
-	font-size: 1.2rem;
-	line-height: 0;
+	font-size: 1rem;
 }
 .centered {
 	text-align: center;
@@ -42,7 +95,6 @@ li span em {
 ul, ol {
 	list-style-type: none;
 	padding: 0;
-	margin: 0;
 }
 
 /* SMALL SCREENS */
