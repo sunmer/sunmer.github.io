@@ -43,7 +43,7 @@ li {
 	margin-bottom: 20px;
 	overflow: hidden;
 	padding-bottom: 60px;
-	border-bottom: 2px solid #000;
+	border-bottom: 1px solid #000;
 }
 li.two div {
 	line-height: 1.6;
