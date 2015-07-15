@@ -3,8 +3,17 @@ body {
     font-family: 'Open Sans', sans-serif;
     font-size: 62.5%;
 }
-h1, h2 {
-	font-size: 1.6rem;
+h1 {
+	font-size: 1.8rem;
+}
+h1, h2, h3, h4 {
+	font-weight: bold;
+	text-align: center;
+}
+h2 {
+	font-size: 1.4rem;
+	margin-bottom: 8px;
+	padding-bottom: 4px;
 }
 p {
 	font-size: 1.2rem;
@@ -24,15 +33,20 @@ h3 {
 	text-align: center;
 	margin-bottom: 10px;
 }
-.tools {
-
+.showMore {
+	color: #000;
+	padding: 1px 4px;
+}
+.more {
+	display: none;
 }
 .tools span {
-	background: #333;
+	background: #000;
 	color: #fff;
 	padding: 2px 10px;
-	border-radius: 2px;
 	font-size: 1rem;
+	margin-bottom: 2px;
+	display: inline-block;
 }
 ul {
 	margin: 0 auto;
@@ -43,7 +57,6 @@ li {
 	margin-bottom: 20px;
 	overflow: hidden;
 	padding-bottom: 60px;
-	border-bottom: 1px solid #000;
 }
 li.two div {
 	line-height: 1.6;
@@ -68,7 +81,6 @@ li div img {
 li h4 {
 	position: relative;
 	text-align: center;
-	font-size: 1.6rem;
 	margin-bottom: 20px;
 }
 li p {
@@ -91,6 +103,21 @@ li strong {
 strong {
 	font-weight: bold;
 }
+footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	text-align: center;
+	background: #000;
+}
+footer p {
+	color: #fff;
+}
+footer a {
+	color: #fff;
+}
 .centered {
 	text-align: center;
 }
@@ -102,12 +129,20 @@ ul, ol {
 
 /* SMALL SCREENS */
 @media only screen and (min-width : 320px) and (max-width : 767px) {
-	h1, h2 {
+	body {
+		padding-left: 30px;
+		padding-right: 30px;
+		font-size: 1.1rem;
+	}
+	h1, h2, h3, h4 {
 		font-size: 1.2rem;
 		margin: 0;
 	}
 	p {
 		font-size: 1rem;
+	}
+	ul {
+		width: 95%;
 	}
 	li {
 		padding: 10px 0;
