@@ -1,0 +1,209 @@
+@font-face {
+    font-family: 'zamenhof';
+    src: url('../font/zamenhof_inline-webfont.eot');
+    src: url('../font/zamenhof_inline-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../font/zamenhof_inline-webfont.woff2') format('woff2'),
+         url('../font/zamenhof_inline-webfont.woff') format('woff'),
+         url('../font/zamenhof_inline-webfont.ttf') format('truetype'),
+         url('../font/zamenhof_inline-webfont.svg#zamenhof-inlineregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 16px;
+	background: #A8DDE5;
+	-webkit-font-smoothing: antialiased;
+}
+.containerMain {
+	margin: 0 auto;
+	max-width: 800px;
+	position: relative;
+}
+h1, h2, h3 {
+	margin: 0;
+}
+h1 {
+	margin: 16px 0 -8px;
+	text-align: center;
+	font-size: 70px;
+	font-family: 'zamenhof';
+	color: #333;
+   	-webkit-text-fill-color: #A8DDE5; /* Will override color (regardless of order) */
+  	-webkit-text-stroke-width: 1px;  	
+}
+h2 {
+	margin-bottom: 40px;
+	line-height: 1;
+	text-align: center;
+	color: #444;
+	font-weight: lighter;
+}
+h3 {
+	text-align: center;
+	font-size: 30px;
+	
+	color: #333;
+}
+p {
+	margin: 4px 0;
+}
+.image {
+	width: 170px;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+	top: -10px;
+}
+.containerQuote {
+	background-color: #fff;
+	height: 70px;
+	text-align: center;
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	padding-bottom: 10px;
+}
+.quote {
+	font-family: georgia;
+	font-size: 1rem;
+	font-style: italic;
+	color: #4E4E4E;
+	text-align: center;
+	padding: 10px 20%;
+}
+.containerTimer {
+	position: relative;
+	float: left;
+	width: 250px;
+	height: 120px;
+	padding: 8px 0;
+	background: #4E4E4E;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	text-align: center;
+	right: 0;
+	top: 40px;
+}
+.containerTimer:after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 15px 0 15px 15px;
+	border-color: transparent #4E4E4E;
+	display: block;
+	width: 0;
+	z-index: 1;
+	right: -15px;
+	top: 45px;
+}
+.containerTimer span {
+	color: #fff;
+	text-align: center;
+	display: inline-block;
+}
+.containerTimer time {
+	font-size: 5rem;
+	margin: 0;
+	padding: 0;
+	line-height: 1;
+	color: #fff;
+	display: block;
+}
+.containerBullets {
+	position: relative;
+	float: right;
+	width: 200px;
+	padding: 8px 12px 16px;
+	background: #4E4E4E;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	right: 0;
+	top: 50px;
+}
+.containerBullets:after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 15px 15px 15px 0;
+	border-color: transparent #4E4E4E;
+	display: block;
+	width: 0;
+	z-index: 1;
+	left: -15px;
+	top: 45px;
+}
+.containerBullets p {
+	color: #fff;
+}
+.containerBullets ul {
+	margin: 10px 0 0 0;
+}
+.containerBullets li {
+	color: #fff;
+	display: inline-block;
+	margin-bottom: 18px;
+	font-size: 1rem;
+	position: relative;
+}
+.containerBullets li:last-child {
+	margin: 0;
+}
+.containerBullets span {
+	padding: 2px 8px;
+	border-radius: 18px;
+	color: #4E4E4E;
+	background: #fff;
+	display: inline-block;
+	margin-right: 6px;
+	font-size: 16px;
+	float: left;
+}
+/* RESETS */
+ul, ol {
+	list-style-type: none;
+	padding: 0;
+}
+
+.devicePanel {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	opacity: 0.6;
+}
+.devicePanel .screen {
+	display: none;
+	background: #ff9519;
+	padding: 4px;
+	color: #fff;
+	font-size: 10px;
+}
+
+/* EFFECTS */
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-webkit-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-ms-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+/* SMALL SCREENS */
+@media only screen and (min-width : 320px) and (max-width : 767px) {
+	.devicePanel .screen.small {
+		display: block;
+	}
+}
+
+/* MEDIUM SCREENS */
+@media only screen and (min-width : 768px) and (max-width : 1024px) {
+	.devicePanel .screen.medium {
+		display: block;
+	}
+}
+
+/* LARGE SCREENS */
+@media only screen and (min-width : 1024px) {
+	.devicePanel .screen.large {
+		display: block;
+	}
+}
