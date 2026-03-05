@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bästa verktygen för innehållshantering: Så inför du ett Git-baserat CMS till GitHub Pages (med verifierbara steg) | sunmer.github.io</title>
+  <link rel="canonical" href="https://sunmer.github.io/articles/basta-verktygen-for-innehallshantering-sa-infor-du-ett-git-baserat-cms-till-github-pages-med-verifierbara-steg.html">
+  <style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  line-height: 1.5;
+}
+h1 { margin: 0 0 12px; }
+article { margin-top: 24px; }
+article h1, article h2, article h3 { margin: 1.5em 0 0.5em; }
+article p { margin: 0.75em 0; }
+article ul, article ol { margin: 0.75em 0; padding-left: 1.5em; }
+article a { color: #0066cc; }
+article table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+article th, article td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+article th { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <article class="prose">
+<h1>Bästa verktygen för innehållshantering: Så inför du ett Git-baserat CMS till GitHub Pages (med verifierbara steg)</h1>
+<p>Ett Git-baserat CMS är ett innehållsverktyg där redigeringar blir commits i ett repository, ofta via pull requests (PR). För en statisk sajt på GitHub Pages är det ett praktiskt sätt att få “CMS-känsla” utan en egen server: du behåller versionshistorik, kan granska ändringar och publicerar via samma flöde som din kod.</p>
+<p>Den här guiden utgår från att du vill välja bland <em>bra innehållshanteringsverktyg</em> (”best content management tools”) men att du specifikt vill ha en Git-baserad variant som fungerar med GitHub Pages. Fokus är en verktygsneutral procedur som du kan följa oavsett om ditt CMS gör direkta commits eller skapar PR:ar. Där det spelar roll pekar jag på etablerade Git-baserade CMS som exempel (t.ex. Decap CMS).</p>
+<h2>Vad som räknas som “bästa” innehållsverktyg i en GitHub Pages-miljö</h2>
+<p>När du publicerar via GitHub Pages är “bästa CMS” sällan det som har flest block och mallar. Det som brukar avgöra om det funkar i praktiken är:</p>
+<ul>
+<li><strong>Git-först</strong>: Innehållet ligger som filer (Markdown/MDX/YAML/JSON) i ditt repo och ändringar går via Git.</li>
+<li><strong>Förutsägbar publicering</strong>: Du kan tydligt se vad som deployas och var du felsöker när något inte bygger.</li>
+<li><strong>Behörigheter och spårbarhet</strong>: Minsta möjliga åtkomst, och en revisionskedja i GitHub (vem ändrade vad, när, och vem godkände).</li>
+<li><strong>Preview och granskning</strong>: Helst PR-baserat flöde så du kan läsa diffar innan publicering.</li>
+</ul>
+<p>GitHub Pages kan publicera antingen från en branch/folder eller via GitHub Actions (inställningen finns under “Build and deployment” → “Source”) enligt GitHub Docs (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=Opf9Xcxw2J">Configuring a publishing source for your GitHub Pages site</a>). För Git-baserade CMS blir den inställningen central, eftersom den styr var “sanningens version” av publicerat innehåll kommer ifrån.</p>
+<h2>Förberedelser: repo, branch-struktur och mappning av innehåll</h2>
+<p>Börja med att bestämma tre saker innan du ens väljer CMS-UI:</p>
+<ol>
+<li><strong>Vilken site-typ du kör</strong></li>
+</ol>
+<ul>
+<li>Använder du ett repo för en användar-/organisationssajt (t.ex. <code>username.github.io</code>) eller en projektsajt? GitHub Pages beskriver upplägget och att du får en site per konto/organisation, samt typiska repo-namn för user/org sites (<a href="https://pages.github.com/?ar_ref=Opf9Xcxw2J">pages.github.com</a>).</li>
+</ul>
+<ol start="2">
+<li><strong>Vilken publiceringskälla du vill ha</strong></li>
+</ol>
+<ul>
+<li><strong>Deploy from a branch</strong>: GitHub bygger/deployar från vald branch + folder.</li>
+<li><strong>GitHub Actions</strong>: du styr bygget med ett workflow och deployar med Pages-actions.</li>
+</ul>
+<p>GitHub själva dokumenterar hur du väljer detta i repo-inställningarna (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=Opf9Xcxw2J">Configuring a publishing source…</a>). Om du vill använda en modern byggkedja (t.ex. Astro/Next export/Vite) eller behöver plugins GitHub Pages inte stödjer, hamnar du ofta i Actions-spåret.</p>
+<ol start="3">
+<li><strong>Innehållsmappning (content model) som är tydlig i filsystemet</strong>
+Håll det enkelt. Ett bra minimival som fungerar för många statiska generators:</li>
+</ol>
+<ul>
+<li><code>/content/</code> för sidor och inlägg i Markdown</li>
+<li><code>/content/posts/</code> eller Jekylls standard <code>/_posts/</code> om du kör Jekyll</li>
+<li><code>/assets/</code> eller <code>/static/</code> för bilder</li>
+<li><code>README.md</code> som beskriver flödet (för redaktörer och utvecklare)</li>
+</ul>
+<p>Jekyll är ett specialfall eftersom GitHub Pages har en definierad “stödd”-yta och begränsar plugins; GitHub dokumenterar att sidor inte kan byggas med plugins som inte stöds (<a href="https://docs.github.com/articles/using-jekyll-plugins-with-github-pages?ar_ref=Opf9Xcxw2J">About GitHub Pages and Jekyll / Using Jekyll plugins with GitHub Pages</a>). Det är en vanlig anledning att istället bygga i Actions och bara deploya statiska output-filer.</p>
+<h2>Checklista: steg för steg från tomt repo till redigerbart innehåll</h2>
+<h3>Checklista: steg för steg från tomt repo till redigerbart innehåll</h3>
+<ol>
+<li><p><strong>Skapa (eller städa) repository och välj publiceringsstrategi</strong></p>
+<ul>
+<li>Åtgärd: Skapa repo och lägg en minimal startsida, t.ex. <code>index.html</code> i root, eller ett generator-projekt med definierad output-mapp. Bestäm om du kör “Deploy from a branch” eller “GitHub Actions” i <strong>Settings → Pages → Build and deployment → Source</strong>.</li>
+<li>Verifiering: I GitHub UI ska du se vald “Source” enligt GitHub Pages-inställningen och (när den första builden gått) en publicerad URL under Pages. GitHub beskriver exakt var inställningen finns och vad alternativen innebär (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=Opf9Xcxw2J">Configuring a publishing source…</a>).</li>
+</ul>
+</li>
+<li><p><strong>Lås en tydlig branch-struktur: en publiceringsbranch och en arbetsbranch</strong></p>
+<ul>
+<li>Åtgärd: Bestäm <code>main</code> som publiceringsbranch och skapa en arbetsbranch, t.ex. <code>content</code>. Alternativ: om du måste deploya från en separat branch (t.ex. <code>gh-pages</code>) så dokumentera det i <code>README.md</code>.</li>
+<li>Verifiering: Under repo-fliken “Branches” ser du båda brancherna. Under “Settings → Pages” ser du att rätt branch används om du kör “Deploy from a branch”.</li>
+</ul>
+</li>
+<li><p><strong>Skapa en minimal, konsekvent innehållsstruktur</strong></p>
+<ul>
+<li>Åtgärd: Skapa mapparna <code>/content/</code> och <code>/assets/</code> (eller motsvarande). Lägg en första fil, t.ex. <code>/content/about.md</code> och en bild i <code>/assets/</code>.</li>
+<li>Verifiering: I repo-vyn kan du klicka dig till filerna och se att sökvägarna stämmer. Om din site redan bygger: kontrollera att sidan finns på din Pages-URL (eller i preview i PR om du har sådan).</li>
+</ul>
+</li>
+<li><p><strong>Definiera ett “CMS-kontrakt” i repo: vad får CMS:et ändra</strong></p>
+<ul>
+<li>Åtgärd: Skriv i <code>README.md</code> vilka mappar CMS får skriva till (exempel: <code>/content/**</code>, <code>/assets/**</code>) och vilka filtyper som gäller (exempel: <code>.md</code>, <code>.yml</code>). Lägg till en enkel regel: ”Ändra inte <code>/config/</code> utan PR-granskning”.</li>
+<li>Verifiering: En extern redaktör kan läsa <code>README.md</code> och förstå exakt vilka filer som ska röras. För dig: det blir en referens när du sätter branch-skydd (steg 7).</li>
+</ul>
+</li>
+<li><p><strong>Välj ett Git-baserat CMS-läge: direkt-commit eller PR-flöde</strong></p>
+<ul>
+<li>Åtgärd: Välj ett CMS som kan arbeta mot GitHub. Exempel: Decap CMS kan antingen pusha direkt till publiceringsbranchen eller använda “Editorial Workflow” som skapar PR:ar för opublicerade ändringar (<a href="https://decapcms.org/docs/editorial-workflows?ar_ref=Opf9Xcxw2J">Decap CMS – Editorial Workflows</a>).</li>
+<li>Verifiering: Gör en testredigering i CMS:et och kontrollera i GitHub om det blev (A) en commit direkt på publiceringsbranchen eller (B) en ny branch + PR. I PR-fallet ska du se en normal GitHub PR med diffar.</li>
+</ul>
+</li>
+<li><p><strong>Säkerställ minsta behörighet för CMS-åtkomst (token/app)</strong></p>
+<ul>
+<li>Åtgärd: Använd helst en GitHub App eller en finmaskig token med minsta möjliga repo-åtkomst. Om du måste använda en finmaskig personal access token (PAT), välj endast nödvändiga repo-permissioner och begränsa token till ett repo.</li>
+<li>Verifiering: I GitHub kan du kontrollera token- eller app-setup och att den är begränsad. GitHub listar hur finmaskiga tokens kopplar till API-behörigheter och betonar permissions som koncept (<a href="https://docs.github.com/rest/overview/permissions-required-for-fine-grained-personal-access-tokens?ar_ref=Opf9Xcxw2J">Permissions required for fine-grained personal access tokens</a>).</li>
+</ul>
+</li>
+<li><p><strong>Slå på branch-skydd: PR-krav, granskning och status checks</strong></p>
+<ul>
+<li>Åtgärd: Skydda publiceringsbranchen (t.ex. <code>main</code>). Miniminivå för ett stabilt CMS-flöde:<ul>
+<li>Kräv PR innan merge</li>
+<li>Kräv minst 1 godkännande</li>
+<li>Kräv att status checks passerar (om du har CI/bygge)</li>
+</ul>
+</li>
+<li>Verifiering: Försök pusha direkt till <code>main</code> med ett konto som inte ska få göra det. GitHub ska blockera. För PR: skapa en PR utan godkännande och se att merge-knappen blockeras tills krav uppfylls. GitHub beskriver hur skyddade brancher och krav på status checks fungerar (<a href="https://docs.github.com/enterprise/admin/guides/developer-workflow/about-protected-branches-and-required-status-checks?ar_ref=Opf9Xcxw2J">About protected branches and required status checks</a>).</li>
+</ul>
+</li>
+<li><p><strong>Sätt upp build/deploy så att du kan läsa fel (branch eller Actions)</strong></p>
+<ul>
+<li>Åtgärd (om “Deploy from a branch”): Säkerställ att den branch/folder du valt faktiskt innehåller byggbara filer. GitHub varnar t.ex. att om du väljer <code>/docs</code> som källa och senare tar bort mappen får du build error för saknad <code>/docs</code> (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=Opf9Xcxw2J">Configuring a publishing source…</a>).</li>
+<li>Åtgärd (om “GitHub Actions”): Använd Pages-actions för att paketera och deploya artefakter, t.ex. <code>actions/upload-pages-artifact</code> och <code>actions/deploy-pages</code> (officiella repos) (<a href="https://github.com/actions/upload-pages-artifact?ar_ref=Opf9Xcxw2J">actions/upload-pages-artifact</a>, <a href="https://github.com/actions/deploy-pages?ar_ref=Opf9Xcxw2J">actions/deploy-pages</a>).</li>
+<li>Verifiering: Gå till fliken “Actions” och öppna senaste körningen. Du ska se en lyckad deploy och en publicerad <code>page_url</code> i deploy-steget (Pages-actionen exponerar den som output enligt action-dokumentationen i repot, t.ex. i README för <a href="https://github.com/actions/deploy-pages?ar_ref=Opf9Xcxw2J">actions/deploy-pages</a>).</li>
+</ul>
+</li>
+<li><p><strong>Inför en “media-policy”: bilder och länkar som inte bryter builden</strong></p>
+<ul>
+<li>Åtgärd: Bestäm en enda bildmapp (t.ex. <code>/assets/</code>) och en enkel regel för filnamn (gemener, bindestreck). Om CMS laddar upp bilder: mappa alltid dit. Undvik att sprida bilder i innehållsmappar om du inte har en tydlig orsak.</li>
+<li>Verifiering: Gör ett testinlägg i CMS med en uppladdad bild. Kontrollera att filen hamnar i rätt mapp och att länken som skrivs i Markdown fungerar på den publicerade sajten.</li>
+</ul>
+</li>
+<li><p><strong>Gör en kontrollerad “ändringskedja” hela vägen till publicering</strong></p>
+</li>
+</ol>
+<ul>
+<li>Åtgärd: Kör en full testcykel: skapa ett nytt inlägg, bifoga en bild, skapa PR (eller commit), få en review, merge:a och verifiera publicerad ändring.</li>
+<li>Verifiering: Du ska kunna peka på tre bevis i GitHub:<ul>
+<li>PR eller commit som visar diff</li>
+<li>Godkännande (review) om PR används</li>
+<li>En lyckad deploy (Pages eller Actions) och att sajten visar ändringen på URL:en</li>
+</ul>
+</li>
+</ul>
+<h2>Säkerhet och behörigheter: tokens, branch-skydd och granskningsflöde</h2>
+<p>Git-baserade CMS blir snabbt en säkerhetsfråga, eftersom verktyget faktiskt skriver till ditt repo. Tre praktiska principer:</p>
+<ol>
+<li><p><strong>Ge verktyget minsta möjliga rättighet</strong>
+Om ditt CMS bara behöver ändra innehållsfiler ska det inte ha admin-rättigheter. GitHub beskriver hur finmaskiga tokens styr åtkomst via permissions (<a href="https://docs.github.com/rest/overview/permissions-required-for-fine-grained-personal-access-tokens?ar_ref=Opf9Xcxw2J">Permissions required for fine-grained personal access tokens</a>). I praktiken: begränsa token till ett repo och bara de scopes/permissions du verkligen behöver för att skapa commits eller PR:ar.</p>
+</li>
+<li><p><strong>Separera “skriva innehåll” från “publicera till main”</strong>
+Det är här branch-skydd gör jobbet. Med krav på PR och godkänd granskning tvingar du fram ett granskningssteg innan publicering. GitHub förklarar mekaniken: om PR:n saknar godkännande eller om obligatoriska status checks inte är gröna ska merge blockeras (<a href="https://docs.github.com/enterprise/admin/guides/developer-workflow/about-protected-branches-and-required-status-checks?ar_ref=Opf9Xcxw2J">About protected branches and required status checks</a>).</p>
+</li>
+<li><p><strong>Håll secrets utanför repo</strong>
+Om du bygger i Actions: lägg tokens/nycklar i GitHub Secrets, inte i <code>.yml</code> eller <code>.env</code> som committas. När du väl har secrets är nästa steg att se över vilka workflow-permissions du ger. GitHub rekommenderar att du begränsar <code>GITHUB_TOKEN</code> till minsta nödvändiga rättigheter och du kan ställa detta per jobb i workflow (<a href="https://docs.github.com/actions/using-jobs/assigning-permissions-to-jobs?ar_ref=Opf9Xcxw2J">Assigning permissions to jobs / GITHUB_TOKEN</a>).</p>
+</li>
+</ol>
+<h2>Preview och publicering: så verifierar du att ändringar byggs rätt</h2>
+<p>Det vanligaste felet i GitHub Pages-flöden är inte att CMS:et “inte kan spara”, utan att ändringen aldrig blir synlig för att den inte deployas.</p>
+<p>Så här gör du felsökningen konkret:</p>
+<ul>
+<li><p><strong>Om du deployar från branch</strong>: kontrollera att GitHub Pages faktiskt pekar på rätt branch och rätt folder. GitHub Docs beskriver exakt detta val och nämner att en borttagen <code>/docs</code>-mapp kan ge build error (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=Opf9Xcxw2J">Configuring a publishing source…</a>).</p>
+</li>
+<li><p><strong>Om du deployar med Actions</strong>: öppna senaste workflow-run under “Actions”. Du vill se två tydliga steg i loggarna:</p>
+<ul>
+<li>uppladdning av artefakt (t.ex. via <code>actions/upload-pages-artifact</code>) (<a href="https://github.com/actions/upload-pages-artifact?ar_ref=Opf9Xcxw2J">actions/upload-pages-artifact</a>)</li>
+<li>deploy till Pages (t.ex. via <code>actions/deploy-pages</code>) (<a href="https://github.com/actions/deploy-pages?ar_ref=Opf9Xcxw2J">actions/deploy-pages</a>)</li>
+</ul>
+</li>
+<li><p><strong>Tolka byggfel i rätt ände</strong>: Om du använder Jekyll och får pluginrelaterade fel kan det bero på att GitHub Pages inte stöder en viss plugin. GitHub är tydliga med att Pages inte kan bygga med “unsupported plugins” (<a href="https://docs.github.com/articles/using-jekyll-plugins-with-github-pages?ar_ref=Opf9Xcxw2J">Using Jekyll plugins with GitHub Pages</a>). Lösningen är då ofta att bygga själv i Actions (där du kan styra versioner och plugins) och bara deploya statisk output.</p>
+</li>
+</ul>
+<h2>När du bör välja bort Git-baserat CMS (och vad du tar i stället)</h2>
+<p>Git-baserade CMS är bland de bästa innehållshanteringsverktygen för GitHub Pages när du vill ha enkel drift och bra spårbarhet. Men de är inte alltid rätt.</p>
+<p>Välj bort Git-baserat CMS om något av detta gäller:</p>
+<ul>
+<li><strong>Du behöver realtidsredigering i samma dokument av flera personer</strong> (Git/PR är sekventiellt; konflikter blir en del av vardagen).</li>
+<li><strong>Du behöver avancerade redaktörsroller, arbetsflöden och publiceringskalender</strong> med många steg och intern governance.</li>
+<li><strong>Du behöver server-side funktioner som hör ihop med innehåll</strong> (personalisering, regler per besökare, komplex sök, integrationslogik) och vill att CMS ska vara navet.</li>
+</ul>
+<p>Alternativ som ofta passar bättre då:</p>
+<ul>
+<li>Ett hostat CMS med inbyggda arbetsflöden och rollhantering (t.ex. klassiska enterprise-CMS eller moderna SaaS-CMS).</li>
+<li>Ett headless CMS med API-first publicering och en separat front-end deploy (du kan fortfarande bygga statiskt, men du hämtar innehåll via API vid build).</li>
+</ul>
+<p>Även om du byter bort Git-baserat CMS kan du behålla några av idéerna i checklistan: tydlig innehållsstruktur, tydliga publiceringsbevis, och ett granskningssteg som går att revidera.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=Opf9Xcxw2J">Configuring a publishing source for your GitHub Pages site</a></li>
+<li><a href="https://pages.github.com/?ar_ref=Opf9Xcxw2J">pages.github.com</a></li>
+<li><a href="https://docs.github.com/articles/using-jekyll-plugins-with-github-pages?ar_ref=Opf9Xcxw2J">About GitHub Pages and Jekyll / Using Jekyll plugins with GitHub Pages</a></li>
+<li><a href="https://decapcms.org/docs/editorial-workflows?ar_ref=Opf9Xcxw2J">Decap CMS – Editorial Workflows</a></li>
+<li><a href="https://docs.github.com/rest/overview/permissions-required-for-fine-grained-personal-access-tokens?ar_ref=Opf9Xcxw2J">Permissions required for fine-grained personal access tokens</a></li>
+<li><a href="https://docs.github.com/enterprise/admin/guides/developer-workflow/about-protected-branches-and-required-status-checks?ar_ref=Opf9Xcxw2J">About protected branches and required status checks</a></li>
+<li><a href="https://github.com/actions/upload-pages-artifact?ar_ref=Opf9Xcxw2J">actions/upload-pages-artifact</a></li>
+<li><a href="https://github.com/actions/deploy-pages?ar_ref=Opf9Xcxw2J">actions/deploy-pages</a></li>
+<li><a href="https://docs.github.com/actions/using-jobs/assigning-permissions-to-jobs?ar_ref=Opf9Xcxw2J">Assigning permissions to jobs / GITHUB_TOKEN</a></li>
+</ul>
+
+  </article>
+</body>
+</html>

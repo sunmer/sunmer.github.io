@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bästa content management tools för GitHub Pages (utan server): en jämförelse som går att verifiera | sunmer.github.io</title>
+  <link rel="canonical" href="https://sunmer.github.io/articles/basta-content-management-tools-for-github-pages-utan-server-en-jamforelse-som-gar-att-verifiera.html">
+  <style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  line-height: 1.5;
+}
+h1 { margin: 0 0 12px; }
+article { margin-top: 24px; }
+article h1, article h2, article h3 { margin: 1.5em 0 0.5em; }
+article p { margin: 0.75em 0; }
+article ul, article ol { margin: 0.75em 0; padding-left: 1.5em; }
+article a { color: #0066cc; }
+article table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+article th, article td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+article th { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <article class="prose">
+<h1>Bästa content management tools för GitHub Pages (utan server): en jämförelse som går att verifiera</h1>
+<p>Du kan publicera på GitHub Pages utan en egen server, men ett klassiskt CMS (WordPress, Strapi, Directus) förutsätter nästan alltid en backend. För GitHub Pages behöver du i praktiken ett verktyg som kan göra en sak på ett robust sätt: skriva innehåll som filer (oftast Markdown) direkt i ditt Git-repository, så att din vanliga build och deploy kan fortsätta som tidigare.</p>
+<p>Det gör valet enklare – och hårdare. Du måste kunna svara “Ja” på tre frågor: (1) Kan verktyget spara till repo? (2) Kan redaktören logga in utan att du bygger en egen auth-server? (3) Kan du leva med hur preview och media fungerar i en statisk publicering?</p>
+<p>Nedan får du en jämförelse med bara verifierbara rutor (Ja/Nej/N/A). Allt som inte kan styrkas i leverantörens egna sidor är markerat som N/A istället för att uppskattas.</p>
+<h2>Kort svar: välj CMS utifrån repo-flöde och publiceringskrav</h2>
+<p>För GitHub Pages är “bäst” nästan alltid “minst friktion i ditt Git-flöde”. Utgå från hur du vill att ändringar ska landa i repo:</p>
+<ul>
+<li>Om du vill att ändringar ska bli vanliga commits (och du är okej med att inloggning hanteras via en extern tjänst): välj ett Git-baserat CMS som Decap.</li>
+<li>Om du vill ha modern redaktörsupplevelse med tydlig GitHub-koppling och branch/PR-flöde: titta på Keystatic eller Tina.</li>
+<li>Om du vill ha ett mer “plattformigt” editorverktyg med team-roller och workflow (men accepterar extern host): CloudCannon.</li>
+<li>Om du vill ha “headless” (API) för flera kanaler: Contentful – men räkna med att du då behöver extern build/preview och mer integration.</li>
+</ul>
+<h2>Vad du menar med “CMS” på GitHub Pages: filbaserat, Git-baserat och headless</h2>
+<p>När du säger CMS i GitHub Pages-sammanhang kan det betyda tre olika drift- och lagringsmodeller:</p>
+<p><strong>1) Filbaserat i repo (Git-baserat CMS)</strong>
+Innehållet är filer i repositoryt (t.ex. <code>content/blogg/*.md</code>). CMS:et gör commits åt dig. Fördelen är spårbarhet, PR-granskning och att GitHub Pages passar naturligt. Nackdelen är att autentisering och preview ofta kräver ett “hjälplager” utanför GitHub Pages.</p>
+<p><strong>2) Headless CMS (API-baserat)</strong>
+Innehållet ligger i en extern databas/tjänst och nås via API. Du bygger en statisk sajt som hämtar data vid build-time (eller i runtime om du inte kör helt statiskt). Fördelen är bra modeller, roller och media. Nackdelen är att GitHub Pages blir ett distributionsmål, inte själva “källan”; du behöver webhooks och CI för att bygga om när innehåll ändras.</p>
+<p><strong>3) “Editor ovanpå repo” (hostad app kopplad till GitHub)</strong>
+Tekniskt liknar det Git-baserat CMS, men verktyget är en separat webbtjänst som du loggar in i och kopplar till GitHub. Det kan ge enklare onboarding för redaktörer, men innebär att själva editorn inte körs “på GitHub Pages”.</p>
+<p>Poängen: GitHub Pages kan publicera statiska filer, men kan inte själv agera backend för inloggning, filuppladdning och säkra tokens. Därför faller många alternativ bort om de kräver en egen server.</p>
+<h3>Jämförelse: CMS-alternativ som passar GitHub Pages</h3>
+<p>Senast kontrollerad: 2026-03-05</p>
+<table>
+<thead>
+<tr>
+<th>Verktyg</th>
+<th>Driftmodell</th>
+<th>GitHub Pages-kompatibel publicering utan server</th>
+<th>Lagring av innehåll</th>
+<th>Prisnivå</th>
+<th>Licens (Open source)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Decap CMS</td>
+<td>Git-baserat</td>
+<td>Nej (GitHub kräver server för auth) enligt dokumentationen för GitHub-backend</td>
+<td>Repo</td>
+<td>Gratis finns: Ja</td>
+<td>Ja (MIT)</td>
+</tr>
+<tr>
+<td>Pages CMS</td>
+<td>Git-baserat</td>
+<td>N/A (kräver separat app/integration)</td>
+<td>Repo (GitHub)</td>
+<td>Gratis finns: Ja</td>
+<td>Ja (Open Source)</td>
+</tr>
+<tr>
+<td>TinaCMS</td>
+<td>Git-baserat / headless-komponenter</td>
+<td>Ja (dokumenterad deploy till GitHub Pages via GitHub Actions)</td>
+<td>Repo (GitHub)</td>
+<td>Gratis finns: Ja</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>CloudCannon</td>
+<td>Git-baserat (editor + plattform)</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>Gratis finns: N/A</td>
+<td>Nej</td>
+</tr>
+<tr>
+<td>Contentful</td>
+<td>Headless</td>
+<td>Ja (som headless; kräver extern build/CI)</td>
+<td>Extern databas (Contentful)</td>
+<td>Gratis finns: Ja</td>
+<td>Nej</td>
+</tr>
+</tbody></table>
+<p>Källor per rad (urval):</p>
+<ul>
+<li>Decap CMS: GitHub-backend beskriver att GitHub kräver server för autentisering och visar repo-konfiguration, samt anger MIT-licens i dokumentationen och repo-beskrivningen (<a href="https://decapcms.org/docs/github-backend?ar_ref=jYaH5w9gQ1">Decap CMS GitHub-backend</a>, <a href="https://github.com/decaporg/decap-cms?ar_ref=jYaH5w9gQ1">decaporg/decap-cms på GitHub</a>).</li>
+<li>Sveltia CMS: beskriver GitHub-stöd och att det är “free, open source, Git-based” på sin sajt (<a href="https://sveltiacms.app/?ar_ref=jYaH5w9gQ1">Sveltia CMS</a>).</li>
+<li>Pages CMS: beskriver “Open Source CMS for GitHub” och miljövariabler för GitHub App i repositoryt (<a href="https://github.com/pages-cms/pages-cms?ar_ref=jYaH5w9gQ1">pages-cms/pages-cms</a>).</li>
+<li>Keystatic: dokumenterar “GitHub mode” via <code>storage</code> = <code>github</code> (<a href="https://keystatic.com/docs/github-mode?ar_ref=jYaH5w9gQ1">Keystatic GitHub mode</a>).</li>
+<li>TinaCMS: dokumenterar hur du deployar till GitHub Pages och rekommenderar GitHub Actions för att även bygga admin, samt repo-baserad media (<a href="https://tina.io/docs/tinacloud/deployment-options/github-pages?ar_ref=jYaH5w9gQ1">Deploying to GitHub Pages | TinaCMS</a>, <a href="https://tina.io/docs/reference/media/repo-based?ar_ref=jYaH5w9gQ1">Repo-based Media | TinaCMS</a>, <a href="https://tina.io/pricing?ar_ref=jYaH5w9gQ1">TinaCMS prissida</a>).</li>
+<li>CloudCannon: prissida och dokumentation om Permission Groups/permissions med datumstämpel och plan-krav (<a href="https://cloudcannon.com/pricing?ar_ref=jYaH5w9gQ1">CloudCannon Pricing</a>, <a href="https://cloudcannon.com/documentation/articles/permissions-reference?ar_ref=jYaH5w9gQ1">Permissions | CloudCannon Documentation</a>).</li>
+<li>Contentful: FAQ för Free plan (primär info om gratisnivå) (<a href="https://www.contentful.com/help/admin/billing-subscription/contentful-free-plan?ar_ref=jYaH5w9gQ1">Contentful Free plan FAQ</a>).</li>
+<li>Netlify Visual Editor (Git CMS): beskriver Git content source och hur filer/asset-typer hanteras (<a href="https://docs.netlify.com/manage/visual-editor/content-sources/git?ar_ref=jYaH5w9gQ1">Netlify Docs: Git CMS</a>).</li>
+</ul>
+<p>Tolka tabellen så här: “Ja” betyder att leverantören uttryckligen dokumenterar påståendet. “N/A” betyder att det kan vara sant i praktiken, men att det inte gick att belägga tydligt i primär dokumentation utan att börja gissa.</p>
+<h2>Begränsningar och risker: build-tider, åtkomst, media och preview</h2>
+<p>Även om du väljer ett Git-baserat CMS finns det fyra återkommande fallgropar när slutmålet är GitHub Pages.</p>
+<p><strong>1) Autentisering: GitHub Pages kan inte vara din auth-server</strong>
+GitHub Pages är statisk hosting. Så fort editorn ska logga in till GitHub och skriva commits måste någon hantera OAuth-flödet och hemligheter. Decap är tydlig med att “GitHub kräver en server för authentication” och att Netlify kan facilitera auth för GitHub-backenden (<a href="https://decapcms.org/docs/github-backend?ar_ref=jYaH5w9gQ1">Decap CMS GitHub-backend</a>). Det betyder inte att du måste hosta hela sajten på Netlify – men du behöver en tjänst någonstans som sköter inloggningen.</p>
+<p><strong>2) Preview: “förhandsgranskning” blir ett CI-problem</strong>
+På en statisk sajt är preview ofta antingen:</p>
+<ul>
+<li>lokal preview (bra för utvecklare, sämre för redaktörer), eller</li>
+<li>en separat preview-deploy per branch/PR.</li>
+</ul>
+<p>Om du redan bygger via GitHub Actions är det ofta här du hamnar. GitHub beskriver att du kan välja GitHub Actions som källa för Pages under “Build and deployment” och att externa CI-flöden ofta deployar genom att committa build-output till <code>gh-pages</code>-branch och lägga till <code>.nojekyll</code> (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=jYaH5w9gQ1">GitHub Docs: Configuring a publishing source</a>). Det är viktigt eftersom preview då i praktiken blir “ytterligare en deploy”, inte bara en knapp i CMS:et.</p>
+<p><strong>3) Media: var ligger bilderna?</strong>
+Med Git-baserade CMS finns två vanliga vägar:</p>
+<ul>
+<li>Bilder ligger i repo (enkelt, men repo växer och bild-optimering blir ditt ansvar).</li>
+<li>Bilder ligger externt (bättre hantering, men du får externa URL:er och mer integration).</li>
+</ul>
+<p>Tina dokumenterar uttryckligen repo-baserad media som ett inbyggt alternativ och att den kan “pull all of your media from GitHub” (<a href="https://tina.io/docs/reference/media/repo-based?ar_ref=jYaH5w9gQ1">Repo-based Media | TinaCMS</a>). Netlify Git CMS dokumenterar också att bara vissa filändelser behandlas som assets (png, jpg, svg m.fl.), vilket påverkar hur du organiserar t.ex. <code>public/</code> eller <code>static/</code> (<a href="https://docs.netlify.com/manage/visual-editor/content-sources/git?ar_ref=jYaH5w9gQ1">Netlify Docs: Git CMS</a>).</p>
+<p><strong>4) Åtkomst och roller: GitHub-konton vs CMS-roller</strong>
+Om verktyget gör commits direkt mot repo är det lätt att hamna i “alla behöver GitHub-konto och repo-access”. Vissa team vill istället ha separata roller (redaktör, granskare, admin) utan att ge direkt GitHub-behörighet. CloudCannon lutar mer åt “CMS-roller” och dokumenterar Permission Groups och scopes, samt att funktionen finns på Team och Enterprise-planer (<a href="https://cloudcannon.com/documentation/articles/permissions-reference?ar_ref=jYaH5w9gQ1">Permissions | CloudCannon Documentation</a>). Det är en tydlig trade-off: bättre intern rollstyrning, men du är inne i en extern plattform.</p>
+<h2>Rekommenderade standardval för tre vanliga scenarier</h2>
+<p>Här är tre typfall som brukar återkomma för GitHub Pages, med rekommendationer som följer tabellen och de dokumenterade begränsningarna.</p>
+<h3>Scenario 1: Solo-projekt eller portfolio – du vill ha en enkel editor men behålla repo som sanning</h3>
+<p>Välj ett Git-baserat CMS där redigering landar som commits. Prioritera verktyg som är tydliga med GitHub-koppling och repo-lagring.</p>
+<ul>
+<li><strong>TinaCMS</strong> är ett praktiskt standardval om du vill ha ett dokumenterat flöde för GitHub Pages och redan bygger via Actions. Tina beskriver specifikt att du ska välja “GitHub Actions” för att kontrollera build-script och samtidigt bygga Tina-admin (<a href="https://tina.io/docs/tinacloud/deployment-options/github-pages?ar_ref=jYaH5w9gQ1">Deploying to GitHub Pages | TinaCMS</a>).</li>
+</ul>
+<p>Varför: du får en väg som är explicit beskriven för just GitHub Pages. Nackdelen är att du behöver acceptera Tinas modell och setup.</p>
+<h3>Scenario 2: Litet team – du vill ha redaktörsroller och tydliga behörigheter utan att alla ska röra GitHub</h3>
+<p>Om du prioriterar rollstyrning och “CMS som arbetsyta” mer än att allt sker via GitHub-gränssnittet kan en plattform vara rimlig.</p>
+<ul>
+<li><strong>CloudCannon</strong> är relevant när roller och scopes är centralt. De dokumenterar hur Permission Groups styr vad teammedlemmar kan göra och att detta finns på Team/Enterprise (<a href="https://cloudcannon.com/documentation/articles/permissions-reference?ar_ref=jYaH5w9gQ1">Permissions | CloudCannon Documentation</a>).</li>
+</ul>
+<p>Varför: det minskar risken att du måste öppna repo för fler än nödvändigt. Nackdelen är att du behöver räkna på kostnad och beroende av leverantörens plattform (och GitHub Pages-kompatibiliteten blir mer indirekt).</p>
+<h3>Scenario 3: Du vill ha headless och fler kanaler – GitHub Pages är bara en av flera publiceringsytor</h3>
+<p>Om du vill återanvända innehåll i flera frontend-projekt (webb, app, dokumentation) är headless mer logiskt.</p>
+<ul>
+<li><strong>Contentful</strong> är ett tydligt exempel på headless med en dokumenterad gratisplan (för att testa) via deras Free plan FAQ (<a href="https://www.contentful.com/help/admin/billing-subscription/contentful-free-plan?ar_ref=jYaH5w9gQ1">Contentful Free plan FAQ</a>).</li>
+</ul>
+<p>Varför: du får en etablerad modell för innehållstyper och API. Nackdelen är att GitHub Pages i sig inte “pratar” med Contentful – du måste bygga integrationen i din statiska site build och trigga ombyggnader när innehållet ändras.</p>
+<h2>Slutsats</h2>
+<p>För GitHub Pages är det sällan meningsfullt att jaga “bästa CMS generellt”. Det du behöver är ett content management tool som passar ett repo- och build-baserat publiceringsflöde.</p>
+<p>Om du vill slippa server helt i din egen drift: välj ett Git-baserat verktyg där leverantören tydligt dokumenterar hur GitHub-auth löses (eller där du accepterar att en extern tjänst behövs för OAuth). Om du vill ha starka roller och processer: acceptera plattformskrav. Om du vill ha headless: behandla GitHub Pages som ett deploy-mål och bygg CI kring webhooks.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://decapcms.org/docs/github-backend?ar_ref=jYaH5w9gQ1">Decap CMS GitHub-backend</a></li>
+<li><a href="https://github.com/decaporg/decap-cms?ar_ref=jYaH5w9gQ1">decaporg/decap-cms på GitHub</a></li>
+<li><a href="https://sveltiacms.app/?ar_ref=jYaH5w9gQ1">Sveltia CMS</a></li>
+<li><a href="https://github.com/pages-cms/pages-cms?ar_ref=jYaH5w9gQ1">pages-cms/pages-cms</a></li>
+<li><a href="https://keystatic.com/docs/github-mode?ar_ref=jYaH5w9gQ1">Keystatic GitHub mode</a></li>
+<li><a href="https://tina.io/docs/tinacloud/deployment-options/github-pages?ar_ref=jYaH5w9gQ1">Deploying to GitHub Pages | TinaCMS</a></li>
+<li><a href="https://tina.io/docs/reference/media/repo-based?ar_ref=jYaH5w9gQ1">Repo-based Media | TinaCMS</a></li>
+<li><a href="https://tina.io/pricing?ar_ref=jYaH5w9gQ1">TinaCMS prissida</a></li>
+<li><a href="https://cloudcannon.com/pricing?ar_ref=jYaH5w9gQ1">CloudCannon Pricing</a></li>
+<li><a href="https://cloudcannon.com/documentation/articles/permissions-reference?ar_ref=jYaH5w9gQ1">Permissions | CloudCannon Documentation</a></li>
+<li><a href="https://www.contentful.com/help/admin/billing-subscription/contentful-free-plan?ar_ref=jYaH5w9gQ1">Contentful Free plan FAQ</a></li>
+<li><a href="https://docs.netlify.com/manage/visual-editor/content-sources/git?ar_ref=jYaH5w9gQ1">Netlify Docs: Git CMS</a></li>
+<li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=jYaH5w9gQ1">GitHub Docs: Configuring a publishing source</a></li>
+</ul>
+
+  </article>
+</body>
+</html>

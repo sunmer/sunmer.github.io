@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloudflare Pages höjer taket till 100 000 filer och byter standard till Node.js v22: när blir det värt att flytta från GitHub Pages? | sunmer.github.io</title>
+  <link rel="canonical" href="https://sunmer.github.io/articles/cloudflare-pages-hojer-taket-till-100-000-filer-och-byter-standard-till-node-js-v22-nar-blir-det-vart-att-flytta-fran-github-pages.html">
+  <style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  line-height: 1.5;
+}
+h1 { margin: 0 0 12px; }
+article { margin-top: 24px; }
+article h1, article h2, article h3 { margin: 1.5em 0 0.5em; }
+article p { margin: 0.75em 0; }
+article ul, article ol { margin: 0.75em 0; padding-left: 1.5em; }
+article a { color: #0066cc; }
+article table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+article th, article td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+article th { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <article class="prose">
+<h1>Cloudflare Pages höjer taket till 100 000 filer och byter standard till Node.js v22: när blir det värt att flytta från GitHub Pages?</h1>
+<p>Om du kör en statisk sajt på GitHub Pages är det lätt att gilla enkelheten: push till ett repo, och sajten är uppdaterad. Men förr eller senare stöter många på samma klassiska väggar: en sajt som växer (fler genererade filer, fler bilder, fler språkversioner) och ett byggsteg som börjar kräva en modernare runtime än vad plattformen ”råkar” ge dig.</p>
+<p>Det är precis därför Cloudflare Pages-uppdateringarna är intressanta som migrations-trigger. Cloudflare har både höjt filgränsen till 100 000 filer för betalda planer och gjort Node.js v22 till standard i sin nyare build image. Tillsammans gör det att en typ av GitHub Pages-sajt – den som är ”statisk men stor” och bygger med modern JS-verktygskedja – plötsligt passar bättre på Pages.</p>
+<p>Här får du en beslutsgrund: vad som faktiskt ändrats, vad det innebär i praktiken, vilka kompatibilitetsrisker du ska räkna med, och hur du kör en låg-risk pilot där GitHub fortfarande är källan och du inte behöver byta domän direkt.</p>
+<h2>1) Vad som ändrades i Cloudflare Pages – och vem som märker det</h2>
+<h3>Filgränsen: 20 000 på Free, 100 000 på betalda planer</h3>
+<p>Cloudflare Pages dokumenterar att Free-planen har en gräns på <strong>20 000 filer per sajt</strong>, medan <strong>betalda planer kan ha upp till 100 000 filer per sajt</strong>. För att aktivera den högre gränsen behöver du dessutom sätta en miljövariabel: <code>PAGES_WRANGLER_MAJOR_VERSION=4</code> i projektets inställningar i Cloudflare. Det står uttryckligen i Pages ”Limits”-dokumentationen. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a> </p>
+<p>Det här är den uppdatering som typiskt påverkar dig om du:</p>
+<ul>
+<li>genererar mycket innehåll (t.ex. dokumentationssajter med många sidor)</li>
+<li>har många assets (bilder, kodexempel, språkpacksfiler)</li>
+<li>bygger med verktyg som spottar ut stora mängder chunkade filer (JS/CSS)</li>
+</ul>
+<p>En viktig detalj: Cloudflare kopplar filgränsen till planer och styrning via env-var. Det betyder att en ”flytt till Pages” ibland inte handlar om att byta hosting, utan om att välja en plan som matchar sajtens storlek.</p>
+<h3>Byggmiljön: Node.js v22 som default i build image v3</h3>
+<p>Cloudflare har publicerat att Pages-byggar i deras inbyggda build-system <strong>nu ger Node.js v22 som standard</strong> i den nyare build image (v3), medan Node.js v18 var default tidigare. <a href="https://developers.cloudflare.com/changelog/post/2025-05-30-pages-build-image-v3?ar_ref=L0qVJVJYTN">Cloudflare Changelog: Pages builds now provide Node.js v22 by default</a> </p>
+<p>I Pages ”Build image”-dokumentation listas också vilka standardversioner som ingår per build image-version. I v3 är default Node <strong>22.16.0</strong> och du kan override:a via <code>NODE_VERSION</code>, <code>.nvmrc</code> eller <code>.node-version</code>. <a href="https://developers.cloudflare.com/pages/configuration/build-image?ar_ref=L0qVJVJYTN">Cloudflare Pages Build image</a> </p>
+<p>Det här märker du om du bygger med t.ex. Next.js, Astro, Vite eller liknande och du vill:</p>
+<ul>
+<li>slippa pinna Node i CI för att få moderna versioner</li>
+<li>minska skillnader mellan lokal utveckling (ofta en modern Node LTS) och byggserver</li>
+</ul>
+<h2>2) Vad 100 000 filer och Node.js v22 betyder i praktiken för byggen</h2>
+<h3>100 000 filer: vad räknas som ”filer” och varför blir du stoppad?</h3>
+<p>På statiska hostar räknas i praktiken varje uppladdad artefakt: HTML, CSS, JS, bilder, fontfiler, sourcemaps, JSON, med mera. En modern frontend-build kan skapa många fler filer än du tror – särskilt om du har:</p>
+<ul>
+<li>många routes som förgenereras</li>
+<li>flera språk (varje språk dubblar ofta antal HTML-filer)</li>
+<li>stora mängder bilder som optimeras och läggs som separata filer</li>
+</ul>
+<p>På Cloudflare Pages är den här gränsen tydlig och dokumenterad som en plattformsgräns. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a> </p>
+<p>Praktisk konsekvens: Om du tidigare undvikit Pages på grund av 20 000-filsgränsen (vanligt vid stora docs-sajter) är den invändningen mindre relevant – men bara om du är beredd att köra en betald plan och sätta <code>PAGES_WRANGLER_MAJOR_VERSION=4</code>.</p>
+<h3>Node.js v22 som default: tre vanliga kompatibilitetsrisker</h3>
+<p>En ny default-runtime brukar ge två sorters problem: det som går sönder direkt, och det som blir ”subtilt annorlunda”. Cloudflare varnar också för att byggar kan fallera om du tidigare litade på default-versioner och sen migrerar till v3 – då behöver du explicit pinna versioner. <a href="https://developers.cloudflare.com/pages/configuration/build-image?ar_ref=L0qVJVJYTN">Cloudflare Pages Build image</a> </p>
+<p>Här är tre typiska risker du bör räkna med när Node v22 blir standard:</p>
+<ol>
+<li><p><strong>Native dependencies och prebuilds</strong>
+Paket som använder native moduler (t.ex. vissa bild-/komprimeringsbibliotek) kan sakna prebuild för exakt Node-version/ABI och då tvingas bygga från källkod. Det kan öka byggtid eller fallera om systemberoenden saknas. Du märker det som <code>node-gyp</code>/kompilatorfel i byggloggar.</p>
+</li>
+<li><p><strong>Låsfiler och package manager-detektion</strong>
+Cloudflare listar flera begränsningar för v3 build system, bland annat att det inte detekterar Yarn-version från <code>yarn.lock</code>, pnpm-version från <code>pnpm-lock.yaml</code>, och inte heller läser Node/package manager från <code>package.json -&gt; engines</code>. <a href="https://developers.cloudflare.com/pages/configuration/build-image?ar_ref=L0qVJVJYTN">Cloudflare Pages Build image</a> 
+Praktisk konsekvens: du kan behöva sätta versioner explicit (env-var eller filer) även om din repo-konfiguration ”brukar räcka” på andra CI.</p>
+</li>
+<li><p><strong>Node-kompatibilitet i edge-miljö (om du använder Functions/Workers)</strong>
+För ren statisk hosting spelar det mindre roll. Men om du kör Pages Functions är det i grunden Workers-miljö, och ”Node i build” är inte samma sak som ”Node API i runtime”. Cloudflare beskriver att Functions-requests debiteras som Workers-requests och att statiska assets är fria och obegränsade, vilket är en påminnelse om att du kan hamna i en hybrid där build och runtime har olika constraints. <a href="https://developers.cloudflare.com/pages/functions/pricing?ar_ref=L0qVJVJYTN">Cloudflare Pages Functions pricing</a></p>
+</li>
+</ol>
+<h2>3) Hur det slår på kostnad och prestanda för stora statiska sajter</h2>
+<h3>Bandbredd och storlek: när GitHub Pages blir trångt</h3>
+<p>GitHub är tydliga med sina Pages-gränser. En publicerad GitHub Pages-sajt får inte vara större än <strong>1 GB</strong>, och det finns en <strong>mjuk bandbreddsgräns på 100 GB per månad</strong>. Dessutom finns en <strong>mjuk gräns på 10 builds per timme</strong> (om du använder deras standardflöde; gränsen gäller inte på samma sätt om du bygger och publicerar via ett eget GitHub Actions-workflow). <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Docs: GitHub Pages limits</a> </p>
+<p>För en portfolio eller en mindre blogg är det sällan ett problem. Men för en större docs-sajt (eller en sajt med mycket media) kan du hamna i ett läge där du måste börja optimera runt gränser, snarare än att bara publicera.</p>
+<h3>Cloudflare Pages: obegränsade requests till statiska assets, men andra kvoter runtom</h3>
+<p>Cloudflare skriver att <strong>requests till statiska assets är fria och obegränsade</strong> (på både free och paid), och att det är Functions som räknas mot Workers-kvoter. <a href="https://developers.cloudflare.com/pages/functions/pricing?ar_ref=L0qVJVJYTN">Cloudflare Pages Functions pricing</a> </p>
+<p>Det här är centralt om din sajt är ”mycket trafik, mest statiskt”. Då kan Cloudflare Pages vara mer förlåtande än en host med tydliga bandbreddstak.</p>
+<p>Samtidigt finns andra praktiska gränser du måste väga in:</p>
+<ul>
+<li><strong>500 builds per månad på Free</strong> och timeout efter 20 minuter. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a> </li>
+<li><strong>Max 25 MiB per enskild asset</strong> (om du har stora PDF:er eller videoklipp behöver du tänka R2 eller annan lagring). <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+</ul>
+<p>Prestanda handlar inte bara om CDN. För en statisk sajt är det ofta ”time-to-first-byte + caching” som dominerar. Både GitHub Pages och Cloudflare Pages lägger dig bakom en CDN-liknande distribution, men Cloudflare har ett stort edge-nätverk som kan vara en fördel om du har internationell publik. Den faktiska vinsten bör du mäta i pilot (se avsnitt 6).</p>
+<h2>4) Jämförelse: GitHub Pages vs Cloudflare Pages i ett GitHub-baserat arbetsflöde</h2>
+<p>Det här är den praktiska kärnan: du vill oftast behålla GitHub som källa (repo, PR-flöde, issues), men du vill att bygg och leverans ska passa din sajt.</p>
+<h3>När GitHub Pages är bäst (stanna kvar)</h3>
+<p>GitHub Pages är svårslaget när du vill ha:</p>
+<ul>
+<li>minimal konfiguration</li>
+<li>en sajt som är liten (väl under 1 GB) och inte extremt trafikdriven</li>
+<li>enkel Jekyll/Markdown-publicering utan specialkrav</li>
+</ul>
+<p>GitHub publicerar dessutom vilka versionsberoenden de kör för Pages, vilket är relevant om du bygger med Jekyll och behöver matcha deras miljö lokalt. <a href="https://pages.github.com/versions?ar_ref=L0qVJVJYTN">GitHub Pages dependency versions</a> </p>
+<p>Det du ofta ”äger själv” på GitHub Pages är att hantera constraints som:</p>
+<ul>
+<li>storleksgränser (1 GB) och bandbreddssoft-limit (100 GB/månad) <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Pages limits</a></li>
+<li>byggtimeout på 10 minuter <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Pages limits</a></li>
+</ul>
+<h3>När Cloudflare Pages blir mer attraktivt (utvärdera flytt)</h3>
+<p>Cloudflare Pages blir intressant när du har en ”modern JS-byggkedja” och antingen växer i filantal eller vill ha en modernare default-runtime i byggsteget.</p>
+<p>Två konkreta triggers som är lätta att koppla till uppdateringarna:</p>
+<ul>
+<li>du har eller är på väg mot en sajt som kräver fler än 20 000 filer → du kan nå 100 000 om du kör betald plan och sätter <code>PAGES_WRANGLER_MAJOR_VERSION=4</code> <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+<li>du vill att Cloudflares inbyggda build ska köra Node v22 som standard (och du vill slippa specialscript i CI) <a href="https://developers.cloudflare.com/changelog/post/2025-05-30-pages-build-image-v3?ar_ref=L0qVJVJYTN">Cloudflare Changelog</a></li>
+</ul>
+<p>Dessutom: om du vill lägga ett säkerhetslager nära din statiska sajt kan Cloudflare-ekosystemet (t.ex. WAF på domännivå om du redan använder Cloudflare som DNS/proxy) bli ett argument. Det är inte en ”Pages-funktion” i sig, men det är en del av helheten när du hostar bakom Cloudflare.</p>
+<h2>Snabbkontroll</h2>
+<p>Vinkla som ett GitHub Pages-siteägarnas dilemma: GitHub Pages är enkelt men begränsat, medan Pages nu adresserar en klassisk smärtpunkt (filantal) och ger modern byggkedja. Lägg fokus på hur man testar en migrering utan att störa SEO, domän och publiceringsrutiner.</p>
+<ul>
+<li><strong>Senast kontrollerad:</strong> 2026-03-05</li>
+<li><strong>Fakta 1:</strong> GitHub Pages publicerade sajter får vara högst <strong>1 GB</strong> stora. <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Pages limits</a></li>
+<li><strong>Fakta 2:</strong> GitHub Pages har en <strong>mjuk bandbreddsgräns på 100 GB per månad</strong>. <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Pages limits</a></li>
+<li><strong>Fakta 3:</strong> GitHub Pages har en <strong>mjuk gräns på 10 builds per timme</strong> (gäller inte på samma sätt om du publicerar via eget GitHub Actions-workflow). <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Pages limits</a></li>
+<li><strong>Fakta 4:</strong> Cloudflare Pages Free tillåter upp till <strong>20 000 filer per sajt</strong>. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+<li><strong>Fakta 5:</strong> Cloudflare Pages betalda planer kan tillåta upp till <strong>100 000 filer per sajt</strong>, och kräver <code>PAGES_WRANGLER_MAJOR_VERSION=4</code> för att aktivera den nivån. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+<li><strong>Fakta 6:</strong> Cloudflare Pages build image v3 har <strong>Node.js v22 som default</strong> (tidigare v18). <a href="https://developers.cloudflare.com/changelog/post/2025-05-30-pages-build-image-v3?ar_ref=L0qVJVJYTN">Cloudflare Changelog</a></li>
+<li><strong>Fakta 7:</strong> Cloudflare anger att <strong>requests till statiska assets är fria och obegränsade</strong> (Functions räknas mot Workers-kvoter). <a href="https://developers.cloudflare.com/pages/functions/pricing?ar_ref=L0qVJVJYTN">Cloudflare Pages Functions pricing</a></li>
+<li><strong>Fakta 8:</strong> Cloudflare Pages Free har <strong>500 builds per månad</strong>. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+</ul>
+<h2>5) Beslutsgrund: stanna eller flytta – med risker och friktion</h2>
+<p>Om du vill fatta ett praktiskt beslut, tänk i fyra kontrollpunkter. Du behöver inte vinna på alla för att en flytt ska vara rimlig.</p>
+<h3>Kontrollpunkt A: filantal och artefakter</h3>
+<ul>
+<li>Om du tydligt ligger under 20 000 filer och inte växer snabbt: Cloudflare-ändringen hjälper dig inte så mycket.</li>
+<li>Om du regelbundet bump:ar i filantal (t.ex. docs-sajt med många versioner): Cloudflare Pages kan bli relevant, men förutsätter betald plan och env-var-ändring. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+</ul>
+<h3>Kontrollpunkt B: byggkedja och Node-version</h3>
+<ul>
+<li>Om du redan bygger i GitHub Actions med pinad Node och bara deployar statiskt till GitHub Pages, har du i praktiken redan ”löst” runtime-frågan.</li>
+<li>Om du däremot vill använda hostens inbyggda build (för enklare setup), då är en modern default viktig. Cloudflare har explicit gjort v22 till default för Pages builds. <a href="https://developers.cloudflare.com/changelog/post/2025-05-30-pages-build-image-v3?ar_ref=L0qVJVJYTN">Cloudflare Changelog</a></li>
+</ul>
+<h3>Kontrollpunkt C: trafikprofil och kostnadsrisk</h3>
+<p>GitHub Pages har mjuka bandbreddsgränser (100 GB/månad) och storleksgränser (1 GB). <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Pages limits</a> </p>
+<p>Cloudflare å sin sida är tydliga med att statiska asset-requests är fria och obegränsade (vilket gör modellen attraktiv för statiska sajter med ”spikar”). <a href="https://developers.cloudflare.com/pages/functions/pricing?ar_ref=L0qVJVJYTN">Cloudflare Pages Functions pricing</a> </p>
+<h3>Kontrollpunkt D: drift, rollback och ”vem äger vad?”</h3>
+<p>En flytt innebär nästan alltid ny drift-yta:</p>
+<ul>
+<li>ny deploy pipeline (även om GitHub är källan)</li>
+<li>ny felbudget: build-loggar och caching-beteenden kan skilja</li>
+<li>ny konfig: redirects/headers har egna format och gränser (t.ex. <code>_redirects</code>, <code>_headers</code>). <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+</ul>
+<p>Det är därför en pilot är så viktig.</p>
+<h2>6) Så gör du en låg-risk pilot – utan att byta domän direkt</h2>
+<p>Målet är att testa Cloudflare Pages som ”render target” medan GitHub fortsatt är system of record. Du vill kunna backa ur utan att ändra repo-struktur eller SEO-kritiska URL:er.</p>
+<h3>Steg 1: skapa ett Pages-projekt kopplat till samma GitHub-repo</h3>
+<p>Koppla Pages till ditt befintliga repo och använd samma build-kommando som du redan kör lokalt (t.ex. <code>npm ci &amp;&amp; npm run build</code>). Poängen här är inte att optimera, utan att få en jämförbar baseline.</p>
+<p>Om du vet att du behöver Node-version pinad (för att minska risken för ”default drift”), lägg en <code>.node-version</code> eller <code>.nvmrc</code> i repot, eller sätt <code>NODE_VERSION</code> i Pages settings. Cloudflare beskriver att det går att override:a versioner via env-var och via dessa filer. <a href="https://developers.cloudflare.com/pages/configuration/build-image?ar_ref=L0qVJVJYTN">Cloudflare Pages Build image</a> </p>
+<h3>Steg 2: om du är beroende av 100 000 filer – slå på det med env-var</h3>
+<p>Om du misstänker att du ligger över 20 000 filer, gör det här tidigt så att du inte felsöker ”mystiska” deploy-failures.</p>
+<p>Sätt <code>PAGES_WRANGLER_MAJOR_VERSION=4</code> i projektets inställningar. Cloudflare skriver att det behövs för att aktivera den ökade filgränsen på betalda planer. <a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a> </p>
+<h3>Steg 3: publicera på en separat preview-domän och jämför</h3>
+<p>Kör pilot på Cloudflares <em>egna</em> domän (ditt <code>*.pages.dev</code>-namn) och låt din riktiga domän fortsätta peka mot GitHub Pages.</p>
+<p>Mät tre saker under en vecka:</p>
+<ul>
+<li>byggstabilitet: antal misslyckade byggen och typ av fel</li>
+<li>byggtid: median och p95 (”95:e percentilen”, alltså de långsammaste 5%)</li>
+<li>prestanda: jämför laddtid och cache headers i webbläsarens DevTools</li>
+</ul>
+<p>Du behöver inte en perfekt labbmiljö. Målet är att se om du får färre driftproblem, inte att jaga millisekunder.</p>
+<h3>Steg 4: lägg in en enkel rollback-plan innan du byter trafik</h3>
+<p>Rollback ska vara trivialt:</p>
+<ul>
+<li>Om du byter DNS senare: dokumentera exakt vad som ändras och hur du återställer.</li>
+<li>Om du använder redirects/headers: håll dem minimala i piloten och skala upp efter att basen fungerar.</li>
+</ul>
+<h3>Steg 5: byt domän sist (och bara om pilotdata säger att det är värt det)</h3>
+<p>När piloten är stabil kan du flytta en mindre del av trafiken först (t.ex. en subdomän som <code>staging.example.com</code>) och behålla huvuddomänen på GitHub Pages tills du är trygg.</p>
+<p>Det här upplägget gör att du kan prova Pages för det som uppdateringen faktiskt handlar om: större statiska sajter och en modernare byggmiljö, utan att du måste ta alla migrationskostnader på en gång.</p>
+<h2>Slutsats</h2>
+<p>Cloudflare Pages-uppdateringarna är inte en generell ”alla borde flytta”-signal. Men de är en tydlig signal för en specifik kategori GitHub Pages-siteägare: du som börjar bli begränsad av storlek/filantal eller som vill ha en mer modern default i byggkedjan utan att lägga mer CI-ansvar på dig själv.</p>
+<p>Om du känner igen dig i filantal-problemet är 100 000-gränsen på betalda planer det konkreta skälet att åtminstone köra en pilot. Om du främst är nöjd med GitHub Pages enkelhet och din sajt är liten, är det lika rimligt att stanna – och i stället bygga via GitHub Actions när du behöver mer kontroll.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://developers.cloudflare.com/pages/platform/limits?ar_ref=L0qVJVJYTN">Cloudflare Pages Limits</a></li>
+<li><a href="https://developers.cloudflare.com/changelog/post/2025-05-30-pages-build-image-v3?ar_ref=L0qVJVJYTN">Cloudflare Changelog: Pages builds now provide Node.js v22 by default</a></li>
+<li><a href="https://developers.cloudflare.com/pages/configuration/build-image?ar_ref=L0qVJVJYTN">Cloudflare Pages Build image</a></li>
+<li><a href="https://developers.cloudflare.com/pages/functions/pricing?ar_ref=L0qVJVJYTN">Cloudflare Pages Functions pricing</a></li>
+<li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits?ar_ref=L0qVJVJYTN">GitHub Docs: GitHub Pages limits</a></li>
+<li><a href="https://pages.github.com/versions?ar_ref=L0qVJVJYTN">GitHub Pages dependency versions</a></li>
+</ul>
+
+  </article>
+</body>
+</html>

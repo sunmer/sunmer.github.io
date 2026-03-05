@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kortare TLS‑certifikat skruvas åt: Let’s Encrypt inför nya profiler och rate limits – så undviker du att din sajt går ner | sunmer.github.io</title>
+  <link rel="canonical" href="https://sunmer.github.io/articles/kortare-tls-certifikat-skruvas-at-let-s-encrypt-infor-nya-profiler-och-rate-limits-sa-undviker-du-att-din-sajt-gar-ner.html">
+  <style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  line-height: 1.5;
+}
+h1 { margin: 0 0 12px; }
+article { margin-top: 24px; }
+article h1, article h2, article h3 { margin: 1.5em 0 0.5em; }
+article p { margin: 0.75em 0; }
+article ul, article ol { margin: 0.75em 0; padding-left: 1.5em; }
+article a { color: #0066cc; }
+article table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+article th, article td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+article th { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <article class="prose">
+<h1>Kortare TLS‑certifikat skruvas åt: Let’s Encrypt inför nya profiler och rate limits – så undviker du att din sajt går ner</h1>
+<p>HTTPS slutar sällan fungera för att “kryptering är svårt”. Det slutar fungera för att förnyelsen inte händer i tid – eller för att en liten förändring i DNS, CDN eller proxy gör att valideringen plötsligt misslyckas.</p>
+<p>Under 2026–2028 blir det här en mer vardaglig driftfråga. Let’s Encrypt minskar certifikatens livslängd stegvis och gör det möjligt att välja kortare profiler tidigare. Samtidigt skärper de hur du bör tänka kring “nya” certifikat kontra rena förnyelser, eftersom rate limits framför allt slår mot nyutfärdande – inte mot en fungerande förnyelsekedja.</p>
+<p>Poängen för dig som driver en sajt (särskilt en statisk sajt på GitHub Pages) är enkel: manuell förnyelse och “vi fixar det när varningen kommer” blir snabbt ohållbart. Du behöver robust ACME‑automation, ett rimligt förnyelsefönster och övervakning som upptäcker fel innan webbläsare gör det.</p>
+<h2>1) Vad som förändras i cert‑ekosystemet – och varför det spelar roll</h2>
+<p>Let’s Encrypt har länge drivit på kortare certifikatlängder för att minska konsekvensen av läckta nycklar och för att göra webbens identitet mer “färsk”. Resultatet är att cykeln för certifikatlivslängd krymper från dagens 90 dagar till 64 dagar och därefter 45 dagar i deras standardprofil (“classic”), med en tydlig tidslinje för när det sker (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</p>
+<p>Kortare livslängd ger inte automatiskt säkrare drift om din förnyelseprocess är skör. Tvärtom: när du måste förnya oftare ökar antalet “tillfällen att misslyckas”. Ett enda fel i DNS‑kedjan, en felställd proxy, ett blockerat valideringsflöde eller en ACME‑klient som kör för sällan kan räcka för att en sajt tappar giltigt cert.</p>
+<p>Let’s Encrypt beskriver också en praktisk följdeffekt: om typiskt förnyelsebeteende går från runt dag 60 (på ett 90‑dagarscert) till runt dag 30 (på ett 45‑dagarscert) så fördubblas antalet dagliga förnyelseförfrågningar i systemet (<a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt, 2026‑02‑24</a>). Det är inte något du själv måste dimensionera för, men det säger något om var “normalen” hamnar: fler, tidigare och mer kontinuerliga förnyelser.</p>
+<h2>2) Vad Let’s Encrypt faktiskt ändrar: livslängd, profiler och rate limits</h2>
+<h3>Tidslinjen: 90 → 64 → 45 dagar</h3>
+<p>Let’s Encrypt rullar ut förändringen i steg och använder ACME‑profiler så att klienter kan välja när de vill byta beteende (i praktiken styrt av vad din ACME‑klient stödjer) (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>). Nyckeldatum:</p>
+<ul>
+<li><strong>13 maj 2026:</strong> profilen <strong><code>tlsserver</code></strong> börjar utfärda <strong>45‑dagarscertifikat</strong> (opt‑in för tidiga användare och test) (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</li>
+<li><strong>10 februari 2027:</strong> standardprofilen <strong><code>classic</code></strong> går över till <strong>64‑dagarscertifikat</strong> och <strong>10 dagars återanvändning av validering (authorization reuse period)</strong> (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</li>
+<li><strong>16 februari 2028:</strong> standardprofilen <strong><code>classic</code></strong> går vidare till <strong>45‑dagarscertifikat</strong> och <strong>7 timmar</strong> authorization reuse period (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</li>
+</ul>
+<p>Viktigt i planeringen: datumen är när Let’s Encrypt ändrar vad som utfärdas för <strong>nya certifikat</strong> i respektive profil. Du ser effekten i praktiken vid <strong>nästa förnyelse efter datumet</strong> (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</p>
+<h3>Rekommendationen: använd ARI eller förnya tidigare</h3>
+<p>Let’s Encrypt rekommenderar att klienter använder <strong>ACME Renewal Information (ARI)</strong> så att klienten kan få vägledning om när certet bör förnyas (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>). Om din klient inte stödjer ARI behöver du säkerställa att schemat inte är “hårdkodat” för 60 dagar, eftersom det inte räcker när certifikat blir 45 dagar. De anger som exempel att förnyelse runt <strong>två tredjedelar</strong> av certets livstid är acceptabelt beteende (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</p>
+<h3>Rate limits: vad som påverkas (och vad som inte gör det)</h3>
+<p>Den vanliga missuppfattningen är att “kortare cert = fler förnyelser = vi kommer fastna i rate limits”. Let’s Encrypt är tydliga med motsatsen: deras rate limits påverkar framför allt <strong>utfärdande för nya domäner eller nya grupper av domännamn</strong>, medan <strong>förnyelser är undantagna</strong> (<a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt, 2026‑02‑24</a>).</p>
+<p>Det betyder inte att rate limits är irrelevanta. De blir relevanta när din automation beter sig som att varje körning är “första gången”: till exempel om du tappar tillstånd (state) i ACME‑klienten, byter konton i onödan, skapar nya orderflöden för samma namn eller felsöker i produktion istället för staging.</p>
+<p>Några konkreta gränser som ofta märks i praktiken:</p>
+<ul>
+<li><strong>New Orders per Account:</strong> upp till <strong>300 nya order</strong> per konto per 3 timmar (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt rate limits‑dokumentation</a>).</li>
+<li><strong>New Certificates per Registered Domain:</strong> upp till <strong>50 certifikat</strong> per registrerad domän per 7 dagar (global gräns) (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt rate limits‑dokumentation</a>).</li>
+<li><strong>New Certificates per Exact Set of Identifiers:</strong> upp till <strong>5 certifikat</strong> per exakt samma uppsättning DNS‑namn per 7 dagar (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt rate limits‑dokumentation</a>).</li>
+</ul>
+<p>Let’s Encrypt förklarar också att de vill att förnyelser “nästan aldrig” ska slå i rate limits, och att man bör använda <strong>staging‑miljön</strong> vid utveckling/test för att undvika att konsumera produktionskvoter (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt rate limits‑dokumentation</a>).</p>
+<h2>3) Så påverkas din drift: förnyelsefrekvens, felmönster och incidentrisk</h2>
+<p>När certen blir kortare händer tre saker i driften:</p>
+<ol>
+<li><p><strong>Förnyelse blir ett konstant flöde.</strong> Du kan inte tänka “vi gör certförnyelse någon gång i kvartalet”. När 45 dagar blir norm ska du räkna med förnyelse ungefär runt dag 30 om klienten följer Let’s Encrypts modell (<a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt, 2026‑02‑24</a>).</p>
+</li>
+<li><p><strong>Små beroenden blir single point of failure.</strong> För statiska sajter är det vanligt att lägga ett CDN eller en proxy framför (för cache, WAF, redirects, eller enklare DNS). Med kortare certlivslängd blir det fler tillfällen då validering måste fungera. Om proxyn gör att Let’s Encrypt inte kan nå rätt origin, eller om DNS pekar “nästan rätt”, kan det räcka för att certkedjan fastnar.</p>
+</li>
+<li><p><strong>Felsökning tar längre tid än du tror.</strong> Det farliga är inte att certet går ut om 45 dagar. Det farliga är att du ofta upptäcker det sent: när GitHub Pages visar att cert inte kan utfärdas, när webbläsaren varnar, eller när användare rapporterar.</p>
+</li>
+</ol>
+<p>Ett typiskt incidentmönster för en statisk sajt:</p>
+<ul>
+<li>Du byter DNS‑leverantör eller lägger på en proxy.</li>
+<li>TLS fortsätter fungera ett tag (befintligt cert är fortfarande giltigt).</li>
+<li>Vid nästa förnyelse kan valideringen inte genomföras.</li>
+<li>Efter att certet gått ut får besökare HTTPS‑fel.</li>
+</ul>
+<p>Med 90‑dagarscert kan du “ha tur” och hinna märka felet. Med 45‑dagarscert minskar bufferten.</p>
+<h2>4) Fakta du kan luta dig mot (förnyelsefönster + minsta övervakning)</h2>
+<p>Här är en enda sak att ta med dig: du vill att förnyelse ska vara så automatiserad och “tråkig” att du inte tänker på den.</p>
+<div>
+
+<h3>Sätt det i en GitHub Pages-värld: även om GitHub hanterar cert för github.io och ofta för custom domains, är din största riskkedja domän/DNS och felaktig proxy/CDN-konfiguration som blockerar validering.</h3>
+<p><strong>Senast kontrollerad:</strong> 2026-03-05</p>
+<ul>
+<li><strong>Tidslinje som påverkar dig:</strong> Let’s Encrypt inför 45‑dagarscert i profilen <code>tlsserver</code> <strong>13 maj 2026</strong>, går till 64 dagar i standardprofilen <code>classic</code> <strong>10 februari 2027</strong> och till 45 dagar i <code>classic</code> <strong>16 februari 2028</strong> (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt</a>).</li>
+<li><strong>Förnyelsebeteende att räkna med:</strong> Let’s Encrypt förväntar sig att förnyelse i framtiden typiskt sker runt <strong>dag 30</strong> för 45‑dagarscert (jämfört med runt dag 60 för 90‑dagarscert) (<a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt</a>).</li>
+<li><strong>Rate limits slår främst mot “nya” utfärdanden:</strong> Let’s Encrypt förklarar att deras rate limits påverkar utfärdande för nya domäner/namnset, medan <strong>förnyelser är undantagna</strong> (<a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt</a>).</li>
+<li><strong>Känd risk i GitHub Pages‑världen:</strong> Extra eller felaktiga DNS‑poster kan hindra GitHub från att generera cert för din custom domain; GitHub varnar särskilt för extra <code>A</code>/<code>AAAA</code>/<code>ALIAS</code>/<code>ANAME</code> på apex (<code>@</code>) eller felaktiga <code>CNAME</code> som kan blockera certgenerering (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https?ar_ref=E0gWL7vpya">GitHub Docs</a>).</li>
+<li><strong>Lägsta nivå av övervakning:</strong> bevaka (a) att certets utgångsdatum inte är nära och (b) att din sajt faktiskt svarar över HTTPS utan varning. Kortare cert gör att dessa kontroller behöver vara kontinuerliga, inte kvartalsvisa (driftkonsekvens härledd från Let’s Encrypts förväntade förnyelseintervall: <a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt</a>).</li>
+<li><strong>Testa utan att bränna kvoter:</strong> Let’s Encrypt rekommenderar staging‑miljön vid utveckling/felsökning av klienter för att undvika att konsumera produktions‑rate limits (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt docs</a>).</li>
+</ul>
+</div>
+
+<h2>5) Så säkrar du automationen steg för steg (utan att byta plattform)</h2>
+<p>Det här är en plan som funkar oavsett om du kör en egen server, en containerplattform eller bara vill försäkra dig om att en tjänst (som GitHub Pages) får förutsättningar att göra jobbet.</p>
+<h3>Steg 1: Kartlägg din TLS‑kedja (det du faktiskt kör i produktion)</h3>
+<p>Skriv ner, i en enda rad, hur trafiken går:</p>
+<p>“Browser → DNS → (CDN/proxy?) → origin (GitHub Pages / server) → ACME‑validering → certutfärdare”</p>
+<p>Poängen är att hitta var certförnyelse kan blockeras. För statiska sajter är det ofta <strong>DNS och proxyinställningar</strong> som är den faktiska svaga länken, inte certutfärdaren.</p>
+<h3>Steg 2: Säkerställ att din ACME‑klient inte kör på ett hårdkodat 60‑dagarsschema</h3>
+<p>Om du driver egen automation: kontrollera schemat. Let’s Encrypt varnar uttryckligen för klienter som förnyar på en fast 60‑dagarsintervall, eftersom det inte räcker när cert bara gäller 45 dagar (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</p>
+<p>Sikta på något som är robust mot ändringar i livslängd:</p>
+<ul>
+<li>ARI om klienten stödjer det (se klientens dokumentation; Let’s Encrypt rekommenderar ARI) (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</li>
+<li>Annars: förnyelse runt <strong>~2/3 av livslängden</strong> (till exempel dag 30 på 45‑dagarscert) (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a>).</li>
+</ul>
+<h3>Steg 3: Separera test från skarp drift</h3>
+<p>När du testar ny konfiguration eller felsöker: använd staging där det är möjligt. Let’s Encrypt betonar staging för utveckling och test för att minska risken att träffa rate limits under felsökning (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt docs</a>).</p>
+<p>Det här är extra viktigt om du ofta “provar igen” och råkar skapa många nya order/cert för samma identifierare – då kan du slå i gränser som <strong>5 certifikat per exakt set av identifiers per 7 dagar</strong> (<a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt docs</a>).</p>
+<h3>Steg 4: Bygg övervakning som speglar verklig användarupplevelse</h3>
+<p>Miniminivån är två signaler:</p>
+<ul>
+<li><strong>Certifikatets utgångsdatum</strong> (exempelvis larma när det är &lt; 14 dagar kvar).</li>
+<li><strong>En riktig HTTPS‑kontroll</strong> (en ping/HTTP‑check som validerar att TLS‑handshake fungerar och att du inte får certfel).</li>
+</ul>
+<p>Varför båda? Utgångsdatum säger att du närmar dig risk. En riktig HTTPS‑check säger att du redan har ett problem (t.ex. fel kedja, fel cert på edge, eller omdirigering som ställer till det).</p>
+<h3>Steg 5: Ha en fallback som inte kräver “magi”</h3>
+<p>Fallback betyder inte att du ska byta CA under stress. Fallback betyder att du har en enkel, dokumenterad åtgärd som återställer validering:</p>
+<ul>
+<li>“Stäng av proxy‑läge tillfälligt” (om du kör proxad DNS hos ett CDN).</li>
+<li>“Återställ DNS till GitHub Pages rekommenderade poster.”</li>
+<li>“Ta bort extra poster som blockerar certutfärdande.”</li>
+</ul>
+<p>Den här typen av åtgärder är ofta det som faktiskt gör skillnad när det är domän/DNS som hindrar validering.</p>
+<h2>6) Om du kör GitHub Pages: vad du kontrollerar och vad plattformen sköter</h2>
+<p>GitHub Pages är ett bra exempel på varför kortare certlivslängd inte bara är en serverfråga.</p>
+<p>GitHub beskriver att när du sätter eller ändrar en custom domain i Pages‑inställningarna gör GitHub en automatisk DNS‑kontroll. Om den lyckas köar GitHub ett jobb för att begära ett TLS‑certifikat från Let’s Encrypt och laddar sedan upp certet till den infrastruktur som terminerar TLS för Pages (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https?ar_ref=E0gWL7vpya">GitHub Docs</a>).</p>
+<p>Det innebär:</p>
+<ul>
+<li>GitHub hanterar <strong>själva certutfärdandet och installationen</strong> när DNS‑förutsättningarna är rätt (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https?ar_ref=E0gWL7vpya">GitHub Docs</a>).</li>
+<li>Du ansvarar för <strong>DNS‑riktigheten</strong> och för att du inte råkar lägga in poster som gör att GitHub inte kan generera cert.</li>
+</ul>
+<h3>DNS: den vanligaste orsaken till att cert inte kan utfärdas</h3>
+<p>GitHub är ovanligt konkreta här: de varnar för att <strong>extra DNS‑poster</strong> kan hindra att cert skapas. Exempel de nämner är extra <code>A</code>, <code>AAAA</code>, <code>ALIAS</code>, <code>ANAME</code> på apex (<code>@</code>) eller <code>CNAME</code>‑poster som pekar till subdomäner du vill använda – sådant kan blockera certgenerering (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https?ar_ref=E0gWL7vpya">GitHub Docs</a>).</p>
+<p>Praktiskt arbetssätt:</p>
+<ul>
+<li>Håll DNS “rent” för den host du använder för Pages.</li>
+<li>Undvik dubbla pekningar (t.ex. både <code>A</code> och en annan tjänst på samma apex).</li>
+<li>Om du använder CDN/proxy: var extra försiktig så att du inte döljer origin på ett sätt som stoppar validering.</li>
+</ul>
+<h3>Mixed content: när HTTPS är på men sidan känns “trasig”</h3>
+<p>När cert och HTTPS väl är på kan du ändå få problem om sidan laddar resurser över <code>http://</code>. GitHub kallar det mixed content och rekommenderar att du ändrar resurser till <code>https://</code> i HTML/CSS/JS (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https?ar_ref=E0gWL7vpya">GitHub Docs</a>).</p>
+<p>Det är inte direkt kopplat till certlivslängd, men det är ett klassiskt “allt ser grönt ut i inställningar men användaren får varningar/trasiga resurser”. När cert förnyas oftare vill du minska alla andra orsaker till TLS‑relaterade incidenter.</p>
+<h2>Slutsats: gör förnyelse till en rutin, inte ett projekt</h2>
+<p>Let’s Encrypts väg mot 45‑dagarscertifikat är inte en dramatisk kryptonyhet. Det är en driftförändring med tydliga datum: opt‑in 45 dagar från <strong>13 maj 2026</strong>, sedan 64 dagar i standardprofilen från <strong>10 februari 2027</strong>, och 45 dagar i standardprofilen från <strong>16 februari 2028</strong> (<a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt</a>).</p>
+<p>Om du redan har fungerande automation är budskapet lugnande: Let’s Encrypt säger att förnyelser är undantagna från rate limits och att du i normalfallet inte behöver ändra dina limits för att klara kortare livslängd (<a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt</a>). Det du däremot behöver göra är att verifiera att din process verkligen beter sig som en förnyelsekedja – och att din DNS/proxy‑miljö inte råkar stoppa validering.</p>
+<h3>References</h3>
+<ul>
+<li><a href="https://letsencrypt.org/2025/12/02/from-90-to-45?ar_ref=E0gWL7vpya">Let’s Encrypt, 2025‑12‑02</a></li>
+<li><a href="https://letsencrypt.org/2026/02/24/rate-limits-45-day-certs.html?ar_ref=E0gWL7vpya">Let’s Encrypt, 2026‑02‑24</a></li>
+<li><a href="https://letsencrypt.org/docs/rate-limits?ar_ref=E0gWL7vpya">Let’s Encrypt rate limits‑dokumentation</a></li>
+<li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https?ar_ref=E0gWL7vpya">GitHub Docs</a></li>
+</ul>
+
+  </article>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snabbkontroll för val av content management tool till statiska sajter (GitHub Pages som typfall) | sunmer.github.io</title>
+  <link rel="canonical" href="https://sunmer.github.io/articles/snabbkontroll-for-val-av-content-management-tool-till-statiska-sajter-github-pages-som-typfall.html">
+  <style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  line-height: 1.5;
+}
+h1 { margin: 0 0 12px; }
+article { margin-top: 24px; }
+article h1, article h2, article h3 { margin: 1.5em 0 0.5em; }
+article p { margin: 0.75em 0; }
+article ul, article ol { margin: 0.75em 0; padding-left: 1.5em; }
+article a { color: #0066cc; }
+article table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+article th, article td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+article th { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <article class="prose">
+<h1>Snabbkontroll för val av content management tool till statiska sajter (GitHub Pages som typfall)</h1>
+<p>Du kan bygga en bra statisk sajt på GitHub Pages utan att “välja CMS” i klassisk mening. Men så fort någon annan än du ska redigera, du behöver förhandsgranskning (preview) som motsvarar produktion, eller du vill lägga media utanför ditt Git-repo, blir valet av content management tool avgörande.</p>
+<p>Den här artikeln hjälper dig att välja rätt verktygskategori för statisk publicering, med GitHub Pages som typfall. Målet är att du snabbt ska kunna matcha dina krav mot en rekommendation, och veta när du bör byta setup (till exempel byta hosting från GitHub Pages).</p>
+<h2>Utgångspunkt: två frågor som avgör 80% av valet</h2>
+<h3>1) Var ska innehållet bo: i ditt Git-repo eller externt?</h3>
+<ul>
+<li><strong>I Git-repot</strong> (Markdown/YAML i samma repository som koden): du får versionering “gratis”, tydliga diffar, pull requests och enkel backup. Du kan publicera direkt från en branch eller via en workflow.</li>
+<li><strong>Externt</strong> (headless CMS): innehållet ligger i en tjänst (databas/API). Sajten byggs genom att hämta data vid build (eller via webhook-trigger). Det passar när du har mycket media, fler redaktörer, eller när du vill separera innehåll från kod.</li>
+</ul>
+<p>På GitHub Pages kan du konfigurera publicering antingen från en branch/folder eller via GitHub Actions-workflow, vilket gör att Git-baserat innehåll passar naturligt där. Det är en förstahandslösning om du vill hålla allt i ett repo och bygga statiskt utan extra infrastruktur (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=TpSQJPI5NR">GitHub Docs: Configuring a publishing source</a>).</p>
+<h3>2) Hur “riktig” måste preview vara?</h3>
+<p>Det räcker ofta med att du kör sajten lokalt för att granska.</p>
+<p>Men om flera personer ska godkänna innehåll, eller om du behöver se exakt hur en ändring beter sig i en deployad miljö (bas-url, redirects, cache, buildsteg), vill du ha <strong>deploy previews</strong> per branch eller pull request.</p>
+<p>Vissa hostar ger detta som standard, till exempel Cloudflare Pages som kan skapa en unik preview-URL för varje pull request och hålla den uppdaterad när du pushar nya commits (med vissa begränsningar, t.ex. inga preview-URL:er för PR:er från forks) (<a href="https://developers.cloudflare.com/pages/configuration/git-integration/github-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: GitHub integration</a>). Vercel beskriver också att varje deployment får en unik URL och att commits/PR kan trigga deployments när du importerar ett Git-repo (<a href="https://vercel.com/docs/deployments?ar_ref=TpSQJPI5NR">Vercel: Deployments</a>).</p>
+<h2>Snabbkontroll: välj verktygstyp utifrån arbetsflöde och begränsningar</h2>
+<table>
+<thead>
+<tr>
+<th>Innehållslagring</th>
+<th>Redaktörsbehov</th>
+<th>Preview-krav</th>
+<th>Rekommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>I Git-repo</td>
+<td>En utvecklare</td>
+<td>Inget/grundläggande (lokalt räcker)</td>
+<td>Ren Markdown + static site generator (SSG) och publicera på GitHub Pages</td>
+</tr>
+<tr>
+<td>I Git-repo</td>
+<td>En utvecklare</td>
+<td>Kräver deploy previews per PR</td>
+<td>Git-repo + SSG, men byt hosting till plattform med PR-previews (t.ex. Cloudflare Pages/Vercel)</td>
+</tr>
+<tr>
+<td>I Git-repo</td>
+<td>Liten grupp (tekniska)</td>
+<td>Grundläggande</td>
+<td>Git-repo + pull requests som redaktionellt flöde; GitHub Pages via branch eller Actions</td>
+</tr>
+<tr>
+<td>I Git-repo</td>
+<td>Liten grupp (blandat tekniska/icke-tekniska)</td>
+<td>Grundläggande</td>
+<td>Git-baserat CMS (UI som skriver till repo), med tydliga behörigheter och review-flöde</td>
+</tr>
+<tr>
+<td>I Git-repo</td>
+<td>Många icke-tekniska</td>
+<td>Grundläggande</td>
+<td>Headless CMS + build (minskar Git-friktion och inloggningsproblem)</td>
+</tr>
+<tr>
+<td>Externt (headless)</td>
+<td>Liten grupp</td>
+<td>Grundläggande</td>
+<td>Headless CMS + statisk build, rebuild triggas via webhook</td>
+</tr>
+<tr>
+<td>Externt (headless)</td>
+<td>Många icke-tekniska</td>
+<td>Kräver isolerade deploy previews</td>
+<td>Headless CMS + hosting som stödjer preview-deploys, eller ett preview-miljöupplägg som du driftar</td>
+</tr>
+<tr>
+<td>Externt (headless)</td>
+<td>Många icke-tekniska</td>
+<td>Inget/grundläggande</td>
+<td>Headless CMS + build; fokusera på publiceringsflöde och rollstyrning</td>
+</tr>
+<tr>
+<td>Oklart</td>
+<td>Oklart</td>
+<td>Oklart</td>
+<td>Börja med “ren Markdown + SSG” i repo. Lägg till CMS först när du kan peka på en konkret flaskhals</td>
+</tr>
+<tr>
+<td>I Git-repo, men media växer snabbt</td>
+<td>Valfritt</td>
+<td>Valfritt</td>
+<td>Flytta media till extern lagring (eller byt till headless). Undvik att repo blir en filserver</td>
+</tr>
+</tbody></table>
+<p>Tabellen är medvetet kategorisk. Poängen är att du snabbt ska kunna sortera bort fel väg.</p>
+<ul>
+<li>Om du <strong>kan leva med innehåll i Git</strong> och få redaktörer: börja där. Det är enklast att drifta.</li>
+<li>Om du <strong>måste ha PR-previews</strong>: GitHub Pages är ofta inte den bekvämaste vägen, eftersom Pages i praktiken är “en produktion” per repo/site. Hostar som Cloudflare Pages skapar automatiskt preview-URL:er för PR:er, vilket matchar ett review-flöde bättre (<a href="https://developers.cloudflare.com/pages/configuration/git-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: Git integration</a>).</li>
+<li>Om du har <strong>många icke-tekniska redaktörer</strong>: Git-baserade CMS kan fungera, men autentisering och workflow blir snabbt “projektet”. Då är headless CMS ofta mer robust.</li>
+</ul>
+<h2>När GitHub Pages räcker, och när du behöver något annat än GitHub Pages</h2>
+<h3>När GitHub Pages räcker</h3>
+<p>GitHub Pages är bra när du vill ha:</p>
+<ul>
+<li>Ett repo som “source of truth” och en enkel publiceringsmodell.</li>
+<li>En statisk sajt utan serverkod.</li>
+<li>En pipeline som antingen publicerar från en branch/folder eller via Actions.</li>
+</ul>
+<p>GitHub beskriver att du kan publicera när ändringar pushas till en vald branch (eller docs-folder), eller genom att använda en GitHub Actions-workflow för att publicera sajten (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=TpSQJPI5NR">GitHub Docs: Configuring a publishing source</a>).</p>
+<p>Om du kör en SSG som inte är Jekyll kan du ändå bygga i Actions och deploya resultatet till Pages. GitHub tillhandahåller en officiell action för att publicera artifacts till GitHub Pages, vilket är en vanlig komponent i sådana workflows (<a href="https://github.com/actions/deploy-pages?ar_ref=TpSQJPI5NR">actions/deploy-pages</a>).</p>
+<p>En praktisk detalj: GitHub Pages försöker Jekyll-processa innehåll som standard, men du kan helt bypassa Jekyll genom att lägga en tom fil som heter <code>.nojekyll</code> i root för din Pages-publicerade output (<a href="https://github.blog/news-insights/bypassing-jekyll-on-github-pages?ar_ref=TpSQJPI5NR">GitHub Blog: Bypassing Jekyll on GitHub Pages</a>).</p>
+<h3>När du sannolikt behöver något annat</h3>
+<p>Du bör överväga att komplettera eller byta från GitHub Pages när någon av dessa punkter blir “vardag”:</p>
+<ol>
+<li><p><strong>Du behöver deploy previews per PR</strong>
+GitHub Pages har ingen inbyggd preview-per-PR på samma sätt som vissa Jamstack-hostar. Cloudflare Pages skapar en unik preview-URL för varje PR (med undantag som PR från forks) (<a href="https://developers.cloudflare.com/pages/configuration/git-integration/github-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: GitHub integration</a>). Vercel beskriver också preview-URL:er per deployment och auto-deploy på commits/PR när du importerar repo (<a href="https://vercel.com/docs/deployments?ar_ref=TpSQJPI5NR">Vercel: Deployments</a>).</p>
+</li>
+<li><p><strong>Du behöver fler redaktörsroller och mindre Git-exponering</strong>
+När redaktörer inte ska behöva förstå branches, merge-konflikter och PR:er är ett UI-baserat CMS ofta bättre.</p>
+</li>
+<li><p><strong>Du behöver frikoppla media från Git</strong>
+Om du lägger stora bilder/video i repot får du snabbt ett repo som är jobbigt att klona och reviewa. Det går att lösa med extern lagring/CDN, men då är du redan på väg mot en headless-arkitektur.</p>
+</li>
+<li><p><strong>Du behöver Jekyll utöver GitHub Pages “whitelist”</strong>
+GitHub Pages har en definierad uppsättning dependency-versioner för Pages-miljön, inklusive vilka Jekyll-komponenter som ingår (<a href="https://pages.github.com/versions?ar_ref=TpSQJPI5NR">GitHub Pages: Dependency versions</a>). GitHub beskriver också att Pages bara stödjer vissa Jekyll-plugins, och hänvisar till listan med dependency-versioner (<a href="https://docs.github.com/articles/using-jekyll-plugins-with-github-pages?ar_ref=TpSQJPI5NR">GitHub Docs: About GitHub Pages and Jekyll / plugins</a>). Om du behöver plugins utanför listan blir det ofta enklare att bygga själv (Actions) eller byta hosting.</p>
+</li>
+</ol>
+<h2>Typiska fallgropar: preview, redaktörer, media och åtkomst</h2>
+<h3>Preview: “lokalt funkar” räcker inte alltid</h3>
+<p>Lokala previews visar layout och innehåll, men missar ofta:</p>
+<ul>
+<li>skillnader i base path (särskilt för project pages),</li>
+<li>redirects och cache,</li>
+<li>buildmiljöns versioner.</li>
+</ul>
+<p>Om du behöver att icke-tekniska ska kunna godkänna i webbläsare är deploy previews i praktiken en produktivitetsfråga. Cloudflare Pages lyfter att de skapar preview-URL:er för commits/branches och i PR:er i Git-flödet (<a href="https://developers.cloudflare.com/pages/configuration/git-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: Git integration</a>).</p>
+<h3>Redaktörer: Git-baserat CMS är “enkelt” tills auth och workflow blir svårt</h3>
+<p>Git-baserade CMS (t.ex. Decap CMS) ger en UI-editor som i slutänden skapar commits och ofta PR:er.</p>
+<p>Decap CMS har ett “Editorial Workflow” där systemet skapar en pull request per opublicerad post när du använder GitHub-backend eller GitHub-kopplad backend (<a href="https://decapcms.org/docs/editorial-workflows?ar_ref=TpSQJPI5NR">Decap CMS: Editorial Workflows</a>). Det är bra när du vill ha review innan publicering.</p>
+<p>Men tänk på att GitHub-auth ofta kräver en serverkomponent för OAuth-flödet. Decap CMS beskriver till exempel att GitHub kräver en server för authentication och att Netlify kan facilitera grundläggande GitHub-auth i deras setup (<a href="https://decapcms.org/docs/github-backend?ar_ref=TpSQJPI5NR">Decap CMS: GitHub backend</a>). Om du kör “bara GitHub Pages” utan en sådan komponent kan inloggningen bli det som stoppar projektet.</p>
+<h3>Media: undvik att göra ditt repo till ett bildarkiv</h3>
+<p>I Git-baserade flöden hamnar media ofta i samma repo. Det är lätt, men skalar sämre.</p>
+<p>Om du vill behålla Git som innehållslager men slippa tunga media finns tre vanliga vägar:</p>
+<ul>
+<li>Länka media från extern lagring (CDN/bucket).</li>
+<li>Låt CMS hantera media externt (vanligt i headless CMS).</li>
+<li>Lägg media i separat repo.</li>
+</ul>
+<p>När du går över till headless CMS är webhook-baserad rebuild standard. Cloudflare Pages har deploy hooks som kan anropas av ett CMS för att trigga en ny build (de visar exempel med CMS som Ghost, Sanity och Strapi) (<a href="https://developers.cloudflare.com/pages/configuration/deploy-hooks?ar_ref=TpSQJPI5NR">Cloudflare Pages: Deploy Hooks</a>).</p>
+<p>Sanity dokumenterar webhooks och varnar för att en webhook kan trigga ofta (t.ex. vid många uppdateringar), vilket är relevant om du bygger om hela sajten på varje publicering (<a href="https://www.sanity.io/docs/webhooks?ar_ref=TpSQJPI5NR">Sanity Docs: Webhooks</a>).</p>
+<h3>Åtkomst: “vem får publicera?” måste vara tydligt</h3>
+<p>I Git-flöden är “publicera” ofta synonymt med att merge:a till main.</p>
+<ul>
+<li>För en utvecklare är det naturligt.</li>
+<li>För en grupp behöver du branch protection + PR-review.</li>
+<li>För många icke-tekniska vill du hellre ha rollstyrning i CMS (författare, editor, publisher).</li>
+</ul>
+<p>GitHub Pages kan publicera på push till en vald branch eller via Actions. Det betyder att du kan välja att låta bara merges till en skyddad branch trigga publicering, eller att en Actions-workflow sköter deployment (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=TpSQJPI5NR">GitHub Docs: Configuring a publishing source</a>).</p>
+<h2>Exempel på 4 vanliga uppsättningar och varför de fungerar</h2>
+<h3>1) “Portfolio i Git”: Markdown + SSG + GitHub Pages</h3>
+<p><strong>Passar när:</strong> du är ensam utvecklare och vill ha låg friktion.</p>
+<ul>
+<li>Innehåll i <code>content/</code> eller <code>_posts/</code> (beroende på SSG) i samma repo.</li>
+<li>Build lokalt; push till <code>main</code>.</li>
+<li>Publicera via Pages från branch/folder eller via Actions.</li>
+</ul>
+<p>Varför det fungerar: GitHub Pages är byggt för att publicera statiskt från repo och du kan konfigurera publiceringskällan utan extra infrastruktur (<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=TpSQJPI5NR">GitHub Docs: Configuring a publishing source</a>).</p>
+<p>Praktisk detalj: om du publicerar en färdigbyggd statisk output (inte Jekyll), lägg <code>.nojekyll</code> i root av den publicerade outputen för att undvika Jekyll-processning (<a href="https://github.blog/news-insights/bypassing-jekyll-on-github-pages?ar_ref=TpSQJPI5NR">GitHub Blog: Bypassing Jekyll on GitHub Pages</a>).</p>
+<h3>2) “Liten grupp”: Git i centrum + PR-review + Git-baserat CMS vid behov</h3>
+<p><strong>Passar när:</strong> ni är 2–5 personer och vill ha review som standard.</p>
+<ul>
+<li>Innehåll i repo.</li>
+<li>Alla ändringar går via pull request.</li>
+<li>Om någon behöver UI: använd ett Git-baserat CMS som skapar PR:er.</li>
+</ul>
+<p>Varför det fungerar: Decap CMS kan använda editorial workflow som skapar pull requests för opublicerade inlägg, vilket matchar ett PR-baserat arbetssätt (<a href="https://decapcms.org/docs/editorial-workflows?ar_ref=TpSQJPI5NR">Decap CMS: Editorial Workflows</a>).</p>
+<p>Varning: GitHub-auth kan kräva extra komponent (beroende på backend). Decap CMS beskriver att GitHub kräver en server för authentication och att Netlify kan facilitera detta i deras setup (<a href="https://decapcms.org/docs/github-backend?ar_ref=TpSQJPI5NR">Decap CMS: GitHub backend</a>). Planera för det om du inte kör Netlify.</p>
+<h3>3) “Preview först”: samma repo, men byt hosting för deploy previews</h3>
+<p><strong>Passar när:</strong> du vill ha deterministisk preview per PR och enklare granskning.</p>
+<ul>
+<li>Behåll innehåll i Git och SSG.</li>
+<li>Flytta hosting till en plattform som automatiskt skapar preview deployments.</li>
+</ul>
+<p>Varför det fungerar: Cloudflare Pages skapar en unik preview-URL per PR och uppdaterar den när du pushar nya commits (med tydliga begränsningar, t.ex. inga preview-URL:er för fork-PR:er) (<a href="https://developers.cloudflare.com/pages/configuration/git-integration/github-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: GitHub integration</a>). Vercel beskriver också unika URLs per deployment och auto-deploy på commits/PR (<a href="https://vercel.com/docs/deployments?ar_ref=TpSQJPI5NR">Vercel: Deployments</a>).</p>
+<p>Det här är ofta den minsta förändringen som ger störst effekt om du har review-flöde men GitHub Pages känns “för statiskt” i processen.</p>
+<h3>4) “Många redaktörer”: headless CMS + statisk build + webhook</h3>
+<p><strong>Passar när:</strong> innehållsteamet är större, icke-tekniskt, eller du behöver bättre rollstyrning och mediahantering.</p>
+<ul>
+<li>Innehåll skapas i ett headless CMS.</li>
+<li>Sajten byggs statiskt (SSG) och hämtar data från CMS vid build.</li>
+<li>En webhook triggar rebuild när innehåll publiceras.</li>
+</ul>
+<p>Varför det fungerar: Cloudflare Pages beskriver deploy hooks som kan trigga en ny build när ett CMS uppdateras, och de visar konkreta CMS-exempel (bl.a. Sanity/Strapi) (<a href="https://developers.cloudflare.com/pages/configuration/deploy-hooks?ar_ref=TpSQJPI5NR">Cloudflare Pages: Deploy Hooks</a>). Sanity dokumenterar webhooks och ger vägledning kring hur de kan konfigureras, samt att de kan trigga ofta vid uppdateringar (relevant för rebuild-kostnad och “noise”) (<a href="https://www.sanity.io/docs/webhooks?ar_ref=TpSQJPI5NR">Sanity Docs: Webhooks</a>).</p>
+<h2>Slutsats: välj kategori, inte “bästa verktyget”</h2>
+<p>“Bästa content management tools” blir ofta en lista. För statiska sajter blir det mer praktiskt att välja <strong>verktygskategori</strong> utifrån tre mätbara krav: var innehållet lagras, hur många som redigerar, och hur stark preview du behöver.</p>
+<p>Om du är osäker: börja med innehåll i Git och en enkel SSG på GitHub Pages. När du tydligt kan säga “vi behöver deploy previews”, “vi har 10 redaktörer”, eller “media i repo är ett problem”, då är det dags att flytta upp en nivå: preview-first hosting eller headless CMS.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site?ar_ref=TpSQJPI5NR">GitHub Docs: Configuring a publishing source</a></li>
+<li><a href="https://developers.cloudflare.com/pages/configuration/git-integration/github-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: GitHub integration</a></li>
+<li><a href="https://vercel.com/docs/deployments?ar_ref=TpSQJPI5NR">Vercel: Deployments</a></li>
+<li><a href="https://developers.cloudflare.com/pages/configuration/git-integration?ar_ref=TpSQJPI5NR">Cloudflare Pages: Git integration</a></li>
+<li><a href="https://github.com/actions/deploy-pages?ar_ref=TpSQJPI5NR">actions/deploy-pages</a></li>
+<li><a href="https://github.blog/news-insights/bypassing-jekyll-on-github-pages?ar_ref=TpSQJPI5NR">GitHub Blog: Bypassing Jekyll on GitHub Pages</a></li>
+<li><a href="https://pages.github.com/versions?ar_ref=TpSQJPI5NR">GitHub Pages: Dependency versions</a></li>
+<li><a href="https://docs.github.com/articles/using-jekyll-plugins-with-github-pages?ar_ref=TpSQJPI5NR">GitHub Docs: About GitHub Pages and Jekyll / plugins</a></li>
+<li><a href="https://decapcms.org/docs/editorial-workflows?ar_ref=TpSQJPI5NR">Decap CMS: Editorial Workflows</a></li>
+<li><a href="https://decapcms.org/docs/github-backend?ar_ref=TpSQJPI5NR">Decap CMS: GitHub backend</a></li>
+<li><a href="https://developers.cloudflare.com/pages/configuration/deploy-hooks?ar_ref=TpSQJPI5NR">Cloudflare Pages: Deploy Hooks</a></li>
+<li><a href="https://www.sanity.io/docs/webhooks?ar_ref=TpSQJPI5NR">Sanity Docs: Webhooks</a></li>
+</ul>
+
+  </article>
+</body>
+</html>

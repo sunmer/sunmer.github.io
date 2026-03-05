@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snabbkontroll för AI-sök-mätning: välj KPI:er som går att lita på | sunmer.github.io</title>
+  <link rel="canonical" href="https://sunmer.github.io/articles/snabbkontroll-for-ai-sok-matning-valj-kpi-er-som-gar-att-lita-pa.html">
+  <style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  line-height: 1.5;
+}
+h1 { margin: 0 0 12px; }
+article { margin-top: 24px; }
+article h1, article h2, article h3 { margin: 1.5em 0 0.5em; }
+article p { margin: 0.75em 0; }
+article ul, article ol { margin: 0.75em 0; padding-left: 1.5em; }
+article a { color: #0066cc; }
+article table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+article th, article td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+article th { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <article class="prose">
+<h1>Snabbkontroll för AI-sök-mätning: välj KPI:er som går att lita på</h1>
+<p>AI-sök har på kort tid gått från experiment till ett nytt lager i hur människor hittar och värderar information. Du ser det i Googles AI Overviews och AI Mode, i Microsoft Copilot och i ChatGPT:s sökfunktion. Gemensamt för plattformarna är att svaret ofta kommer som en syntes – och att källor ibland visas som länkar eller referenser i anslutning till svaret.</p>
+<p>Det här förändrar vad en “bra KPI” är. I klassisk SEO kunde du ofta luta dig mot stabila mått som rankingpositioner, impressions och klick från samma SERP-logik. I AI-sök tillkommer två svårare problem:</p>
+<ol>
+<li><p><strong>Systemen ändras oftare än din rapportcykel.</strong> Google beskriver uttryckligen att AI Mode och AI Overviews kan använda olika modeller och tekniker, vilket gör att både svar och länkset kan variera över tid även om din input är densamma (<a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a>).</p>
+</li>
+<li><p><strong>Resultatet är inte alltid en lista – utan ett “block” med flera länkar och sammanfattning.</strong> Google har dessutom förtydligat hur AI Overviews syns i Search Console: länkarna i en AI Overview räknas som ett block och delar en position, vilket gör positionsdata svår att tolka som om det vore klassiska organiska blå länkar (<a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a>).</p>
+</li>
+</ol>
+<p>Samtidigt går det inte att vänta på perfekta standarder. Marknadsteam behöver ett KPI-set som:</p>
+<ul>
+<li>går att följa över tid,</li>
+<li>är robust när modeller, UI och källvisning ändras,</li>
+<li>hjälper dig fatta beslut (inte bara fylla en dashboard).</li>
+</ul>
+<p>Nedan får du ett praktiskt ramverk, definierade KPI:er (med beräkning), en enda “Snabbkontroll” som kopplar scenario till KPI-set och mätfrekvens – och vanliga feltolkningar som skapar falska trender.</p>
+<h2>Varför KPI:er i AI-sök skiljer sig från klassisk SEO-rapportering</h2>
+<p>I AI-sök sker en större del av “värdeskapandet” inne i svarsrutan. Det kan innebära att en användare får sitt svar utan att klicka vidare, även när källor visas.</p>
+<p>Det finns också en viktig mekanikskillnad: vissa AI-svar <strong>groundas</strong> (förankras) i webbkällor och visar länkar, men system kan också svara mer generellt om relevanta källor inte hittas. Microsoft beskriver detta som “grounding” och nämner att du kan få en mer generell output om relevanta källor inte finns eller är åtkomliga – och att du bör granska källorna innan du delar kritiska detaljer (<a href="https://support.microsoft.com/en-us/topic/what-information-does-copilot-use-to-answer-my-prompt-934f537d-ff7d-4059-9fec-a751e4651307">Microsoft Support: What information does Copilot use to answer my prompt?</a>).</p>
+<p>OpenAI har på liknande sätt beskrivit att ChatGPT Search ger “timely answers with links to relevant web sources” och att ChatGPT kan välja att söka beroende på frågan (<a href="https://openai.com/index/introducing-chatgpt-search">OpenAI: Introducing ChatGPT search</a>).</p>
+<p>För dig betyder det här att <strong>trafik-KPI:er ensamma blir otillräckliga</strong>. Du behöver en mix som mäter:</p>
+<ul>
+<li>om du syns som källa,</li>
+<li>hur ofta du citeras/länkas,</li>
+<li>vilket sammanhang du nämns i,</li>
+<li>och hur stabilt måttet är när plattformen ändras.</li>
+</ul>
+<h2>Definitioner som måste sitta: synlighet, citeringar, sentiment och konkurrensyta</h2>
+<p>Här är de fyra begreppen som gör att ditt KPI-set blir jämförbart över tid.</p>
+<h3>Synlighet (i AI-sök)</h3>
+<p><strong>Definition:</strong> andelen relevanta prompts/frågor där ditt varumärke eller din domän förekommer i AI-svaret.</p>
+<p>Synlighet kan vara:</p>
+<ul>
+<li><strong>Brand-synlighet:</strong> varumärkesnamn nämns i svaret.</li>
+<li><strong>Källsynlighet:</strong> din domän visas som länk/källa i anslutning till svaret.</li>
+</ul>
+<p>Varför två varianter? För att vissa plattformar kan sammanfatta utan att ge tydliga källlänkar i samma format varje gång, och UI kan förändras. Google har t.ex. kommunicerat att de gör länkar i AI Overviews/AI Mode mer synliga på desktop via hover-lösningar med listor av källor (<a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a>). När UI förändras kan “källsynlighet” hoppa utan att din underliggande auktoritet har gjort det.</p>
+<p><strong>Rekommendation:</strong> mät synlighet i två lager (brand + källa) och logga UI-variant.</p>
+<h3>Citeringar</h3>
+<p><strong>Definition:</strong> hur ofta din domän blir refererad som källa (länk/källkort/referens) i AI-svar inom ett definierat prompt-urval.</p>
+<p>I praktiken får citeringar ofta högre stabilitet än rena klick, eftersom de ligger närmare själva “valet av källor” i modellen/söksystemet.</p>
+<h3>Sentiment (i AI-sök)</h3>
+<p><strong>Definition:</strong> tonaliteten i hur varumärket beskrivs i svaret.</p>
+<p><strong>Viktigt:</strong> sentiment i AI-svar påverkas av promptformulering, språk och vilka källor som hämtas. Det är ofta mer brusigt än synlighet/citeringar. Använd sentiment främst för <strong>risk/PR</strong> och som larm, inte som primär tillväxtsignal.</p>
+<h3>Konkurrensyta</h3>
+<p><strong>Definition:</strong> vilka konkurrenter och alternativa lösningar som modellen “väljer” att nämna eller länka till inom samma svarutrymme.</p>
+<p>I AI-sök är konkurrensytan ofta <strong>sammanpressad</strong>: ett svar kan nämna 3–7 aktörer och därmed “välja bort” resten. Det gör att du behöver mäta både <strong>share of voice</strong> och <strong>share of citations</strong> inom just den ytan.</p>
+<h2>Snabbkontroll: Välj KPI:er och mätfrekvens för AI-sök</h2>
+<p>Tabellen nedan är byggd för att ge en repetitiv rekommendation: samma scenario ska ge samma KPI-set. Den är avsiktligt pragmatisk och går att använda även när plattformar ändrar UI.</p>
+<p><strong>Så använder ni den:</strong> välj primärt mätmål, bedöm förändringstakt (hur ofta ni ser att svaren förändras vid upprepade körningar) och notera datatillgång (om ni kan köra samma prompt-set per marknad/språk och spara svar + källor).</p>
+<blockquote>
+<p><strong>Historiskt sammanhang:</strong> exakta UI-detaljer (hur källor visas, var länkar ligger) kan ändras snabbt. Logga därför alltid plattform och datum i er mätning. Google beskriver uttryckligen att AI Mode och AI Overviews kan använda olika modeller/tekniker och att svar/länkar kan variera (<a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a>).</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Mätmål</th>
+<th>Förändringstakt</th>
+<th>Datatillgång</th>
+<th>Rekommendation</th>
+<th>Senast kontrollerad</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Brand awareness</td>
+<td>Hög</td>
+<td>Begränsad</td>
+<td><strong>KPI-set (3–5):</strong> 1) Brand-synlighet (% av prompts med brandnämning), 2) Konkurrensyta: share of voice (andel av nämningar i samma svar), 3) Topp-ämnesassociation (de vanligaste teman som nämns nära varumärket), 4) Volatilitet (hur ofta svaret ändras mellan körningar). <strong>Uppdateringsfrekvens:</strong> Vecka. <strong>Minsta urval:</strong> N/A – använd “tillräcklig volym för stabil trend” (t.ex. minst 30 prompts per språk/marknad). <strong>Använd inte när:</strong> ni bara har 5–10 prompts; då blir det mest slump.</td>
+<td>2026-03-04</td>
+</tr>
+<tr>
+<td>Demand gen</td>
+<td>Medel</td>
+<td>God</td>
+<td><strong>KPI-set (4–6):</strong> 1) Källsynlighet (% av prompts där domänen länkas/citeras), 2) Citeringsgrad (antal citeringar per 100 prompts), 3) CTA-närhet (hur ofta varumärket nämns i rekommendationsdelar som “bästa val”, “fördelar”, “passar för”), 4) Trafikindikator: branded search uplift (sekundär, via Search Console/analytics), 5) Konsistens per prompt-klass (stabilitet inom “jämförelse”, “bäst”, “pris”). <strong>Uppdateringsfrekvens:</strong> Vecka. <strong>Minsta urval:</strong> N/A – prioritera ett fast promptbibliotek per funnel-steg. <strong>Använd inte när:</strong> ni inte kan hålla prompt-setet konstant; annars blandas signal och metod.</td>
+<td>2026-03-04</td>
+</tr>
+<tr>
+<td>SEO/GEO (organisk synlighet i AI-svar)</td>
+<td>Hög</td>
+<td>God</td>
+<td><strong>KPI-set (4–6):</strong> 1) Källsynlighet, 2) Citeringsgrad, 3) Källa-typmix (blogg/produkt-/docs/PR: andelar av era citerade URL-typer), 4) Ämneskluster-täckning (andel prompts där ni citeras inom prioriterade kluster), 5) Förlorade citeringar (prompts där ni tappat källa jämfört med föregående period), 6) Confounder-logg (modell/UI/språk/prompt-klass). <strong>Uppdateringsfrekvens:</strong> Dag för toppkluster, annars vecka. <strong>Minsta urval:</strong> N/A – men undvik att tolka daglig trend om ni har få prompts. <strong>Använd inte när:</strong> ni inte kan spara vilka URL:er som citerades; då blir utveckling omöjlig att felsöka.</td>
+<td>2026-03-04</td>
+</tr>
+<tr>
+<td>PR/risk (felaktiga påståenden, policy, compliance)</td>
+<td>Låg</td>
+<td>Begränsad</td>
+<td><strong>KPI-set (3–5):</strong> 1) Riskpåstående-frekvens (antal prompts där felaktigt/otillåtet påstående förekommer), 2) Sentiment-larm (negativt/varningsdrivet språk om varumärket), 3) Källkvalitet (andel svar som lutar på lågkvalitativa källor eller saknar tydliga källor), 4) Åtgärdstid (tid från upptäckt till korrigering/kommunikation). <strong>Uppdateringsfrekvens:</strong> Månad + incidentdrivet. <strong>Minsta urval:</strong> N/A – fokusera på hög-riskpromptar. <strong>Använd inte när:</strong> ni försöker dra tillväxtslutsatser; detta är en säkerhetsmätning, inte en performance-mätning.</td>
+<td>2026-03-04</td>
+</tr>
+</tbody></table>
+<h2>KPI:erna – beräkning, jämförbarhet och vad som måste loggas</h2>
+<p>För att KPI:er ska vara jämförbara över tid måste ni separera “verklig förändring” från “plattformsskifte”. Det gör ni genom att definiera beräkningen och logga confounders konsekvent.</p>
+<p>Nedan är KPI:er som fungerar i de flesta team – oavsett om ni jobbar med AI-sök som kanal, eller med SEO/GEO, brand och PR.</p>
+<h3>1) Brand-synlighet</h3>
+<p><strong>Beräkning:</strong> (antal prompts där varumärket nämns i svaret) / (antal prompts totalt) × 100.</p>
+<p><strong>Jämförbart över tid när:</strong> promptbiblioteket är stabilt och ni kör samma språk/marknad.</p>
+<p><strong>Måste loggas:</strong> plattform (t.ex. Google AI Overviews, Copilot, ChatGPT Search), datum, språk, geografi, prompt-klass.</p>
+<h3>2) Källsynlighet</h3>
+<p><strong>Beräkning:</strong> (antal prompts där minst en URL från er domän visas som källa/länk) / (antal prompts totalt) × 100.</p>
+<p><strong>Jämförbart över tid när:</strong> ni mäter på “domännivå” som grund, och kompletterar med URL-typmix (se KPI 5).</p>
+<p><strong>Confounders:</strong> förändringar i hur plattformen visar länkar och källor. Google dokumenterar att AI Overviews/AI Mode kan variera i svar och länkset beroende på modell/teknik (<a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a>).</p>
+<h3>3) Citeringsgrad</h3>
+<p><strong>Beräkning:</strong> (antal citeringar av er domän i källor/referenser) / (antal prompts totalt) × 100, eller “per 100 prompts”.</p>
+<p><strong>Varför den är användbar:</strong> den fångar att ni kan bli citerade flera gånger i samma svar.</p>
+<p><strong>Måste loggas:</strong> om citeringen är tydlig länk, källkort eller annan referens. Spara även vilka URL:er som användes.</p>
+<h3>4) Share of voice i konkurrensytan</h3>
+<p><strong>Beräkning:</strong> (antal varumärkesnämningar för er) / (totalt antal varumärkesnämningar för definierad konkurrentlista) inom samma prompt-set.</p>
+<p><strong>Jämförbart över tid när:</strong> konkurrentlistan är låst per kategori.</p>
+<p><strong>Confounders:</strong> förändrad prompt-klass (jämförelsefrågor tenderar att “tvinga fram” fler aktörer än hur-frågor).</p>
+<h3>5) Källa-typmix (era citerade URL-typer)</h3>
+<p><strong>Beräkning:</strong> fördelning (%) av citerade URL:er som tillhör era fördefinierade typer: produkt, dokumentation, blogg, PR/press, support.</p>
+<p><strong>Varför den är viktig:</strong> du kan få “samma” källsynlighet men en sämre mix. Exempel: modellen börjar citera er blogg istället för produktsidor, vilket kan påverka demand gen.</p>
+<p><strong>Måste loggas:</strong> URL-klassificering (regler eller tagging), publiceringsdatum om möjligt.</p>
+<h3>6) Volatilitet (stabilitet mellan körningar)</h3>
+<p><strong>Beräkning:</strong> andel prompts där svaret ändras mellan två körningar inom samma period. En enkel variant är “ändrades/ändrades inte”; en mer avancerad är text- och käll-diff.</p>
+<p><strong>Jämförbart över tid när:</strong> ni kör samma prompts med samma inställningar.</p>
+<p><strong>Confounders:</strong> plattformens modell-/UI-uppdateringar. Ni bör behandla volatilitet som en egen signal, inte som fel.</p>
+<h3>7) Sentiment-larm (för risk/PR)</h3>
+<p><strong>Beräkning:</strong> andel prompts där varumärket beskrivs negativt eller där svaret innehåller riskpåståenden (policybrott, felaktiga claims, säkerhetsråd som strider mot era riktlinjer).</p>
+<p><strong>Jämförbart över tid när:</strong> ni använder samma rubrik för klassning (t.ex. negativ/neutral/positiv + riskflagga).</p>
+<p><strong>Confounders:</strong> språk och promptton påverkar sentiment kraftigt. Håll en neutral promptstandard.</p>
+<h2>Vanliga feltolkningar – och hur ni undviker falska trender</h2>
+<p>De flesta falska trender i AI-sök-mätning kommer från att man mäter något som “flyttar sig” när plattformen ändrar beteende.</p>
+<h3>Feltolkning 1: “Position 1” betyder att vi dominerar</h3>
+<p>I Google Search Console kan AI Overviews uppträda som ett block där länkar delar position. Det gör att position kan se “bättre” ut än den upplevda exponeringen, och den blir svår att jämföra med klassiska blå länkar (<a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a>).</p>
+<p><strong>Motdrag:</strong> använd position främst som stöd, och basera AI-sök-rapportering på källsynlighet/citeringsgrad + prompt-klass.</p>
+<h3>Feltolkning 2: Klickfall betyder att synligheten tappat</h3>
+<p>AI-svar kan minska klick även om du fortfarande citeras. Då kan du se CTR-förändringar utan att “AI-synlighet” förändras.</p>
+<p><strong>Motdrag:</strong> separera KPI:er i två lager:</p>
+<ul>
+<li><strong>Närvaro i AI-svar:</strong> källsynlighet, citeringar.</li>
+<li><strong>Downstream:</strong> klick, leads, branded search.</li>
+</ul>
+<h3>Feltolkning 3: “Sentiment blev sämre” när ni bytte språk eller promptton</h3>
+<p>Sentiment är väldigt känsligt för formulering. En mer konfrontativ prompt (“varför är X dåligt?”) ger nästan alltid mer negativ ton.</p>
+<p><strong>Motdrag:</strong> håll en neutral promptmall och logga språk/marknad. Använd sentiment som larm och kvalitativ granskning.</p>
+<h3>Feltolkning 4: Ni jämför två perioder med olika promptmix</h3>
+<p>Om ni adderar fler jämförelseprompts i februari än i januari får ni ofta fler konkurrentnämningar. Då ser share of voice sämre ut utan att något egentligen hänt.</p>
+<p><strong>Motdrag:</strong> lås ett “kärnbibliotek” av prompts och lägg nya prompts i en separat kohort tills ni har historik.</p>
+<h3>Feltolkning 5: Ni ser en trend men har för litet urval</h3>
+<p>AI-sök-utfall är stokastiskt: små variationer kan ge stora utslag i små dataset.</p>
+<p><strong>Motdrag:</strong> om ni inte kan styrka ett minsta N, använd N/A i er policy och sätt istället en kvalitativ regel: “tillräcklig volym för stabil trend”. Praktiskt: hellre 30–50 prompts per språk/marknad än 10.</p>
+<h2>Så operationaliserar ni rapporten: ägarskap, dashboard-vyer och larmgränser</h2>
+<p>En bra AI-sök-rapport är inte en lång KPI-lista. Den är en rutin: samma mätning, samma loggning, samma tolkning.</p>
+<h3>Ägarskap: vem gör vad</h3>
+<ul>
+<li><strong>SEO/GEO-analytiker:</strong> äger promptbibliotek, körningar, diff, URL-klassning.</li>
+<li><strong>Brand/PR:</strong> äger riskpromptar, sentiment-larm och incidentflöde.</li>
+<li><strong>Demand gen/marketing ops:</strong> äger kopplingen till downstream-mått (trafik, pipeline) och uppföljning.</li>
+</ul>
+<h3>Dashboard-vyer som brukar fungera</h3>
+<p>Bygg hellre få vyer än många:</p>
+<ol>
+<li><strong>Översikt:</strong> källsynlighet + citeringsgrad (per marknad/språk), samt volatilitet.</li>
+<li><strong>Konkurrensyta:</strong> share of voice + vilka konkurrenter som oftast nämns med er.</li>
+<li><strong>Källa-typmix:</strong> vilka av era URL-typer som citeras.</li>
+<li><strong>Risk:</strong> riskpåståenden och negativa omnämnanden, med exempel för granskning.</li>
+</ol>
+<h3>Larmgränser (praktiska, inte perfekta)</h3>
+<p>Eftersom plattformar kan uppdateras utan förvarning behöver ni larm som fångar brutna mönster.</p>
+<p>Exempel på larm som är robusta:</p>
+<ul>
+<li><strong>Källsynlighet faller</strong> mer än X% vecka över vecka i ett kärnkluster.</li>
+<li><strong>Förlorade citeringar</strong>: antal prompts där ni gick från “citerad” till “inte citerad” ökar kraftigt.</li>
+<li><strong>Volatilitet spikar</strong>: tyder ofta på plattformsförändring; starta då en “change log”-anteckning.</li>
+</ul>
+<h3>En enkel change log som sparar timmar</h3>
+<p>När ni ser en skarp brytpunkt, skriv in i loggen:</p>
+<ul>
+<li>Datum (absolut datum, inte “förra veckan”),</li>
+<li>Plattform och gränssnitt (AI Overviews/AI Mode/Copilot/ChatGPT Search),</li>
+<li>Språk/marknad,</li>
+<li>Vad som förändrades (källvisning, svarslängd, antal källor, nya typer av källor).</li>
+</ul>
+<p>Det här gör att ni kan säga “det var ett plattformsskifte” med belägg, istället för att gissa.</p>
+<h2>Slutsats: KPI:er som går att lita på bygger på kontroll, inte på perfektion</h2>
+<p>Det mest jämförbara du kan göra i AI-sök är att hålla din egen metod konstant: ett fast promptbibliotek, tydlig klassning, och en change log. Sedan väljer du KPI:er som ligger nära själva AI-svaret (källsynlighet, citeringar, konkurrensyta) och använder downstream-mått som sekundära effekter.</p>
+<p>Om du gör bara en sak i veckan: kör kärnpromptarna, logga plattform/språk/modellindikatorer när det går, och följ källsynlighet + citeringsgrad. Det räcker för att se riktning utan att luras av brus.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://developers.google.com/search/docs/appearance/ai-overviews">Google Search Central: AI features and your website</a></li>
+<li><a href="https://support.microsoft.com/en-us/topic/what-information-does-copilot-use-to-answer-my-prompt-934f537d-ff7d-4059-9fec-a751e4651307">Microsoft Support: What information does Copilot use to answer my prompt?</a></li>
+<li><a href="https://openai.com/index/introducing-chatgpt-search">OpenAI: Introducing ChatGPT search</a></li>
+</ul>
+
+  </article>
+</body>
+</html>
